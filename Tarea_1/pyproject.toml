@@ -13,6 +13,7 @@ dependencies = [
     "pillow>=12.2.0",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
+    "sweetviz>=2.3.3",
 ]
 
 [dependency-groups]
