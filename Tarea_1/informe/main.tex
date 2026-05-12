@@ -415,4 +415,96 @@ Los cinco medios cubren aproximadamente el mismo per\'{\i}odo (de 2016-01-01 a 2
 
 \textbf{No se aplica ninguna de las dos restricciones} en este trabajo, por las razones expuestas: la restricci\'{o}n por secci\'{o}n elimina informaci\'{o}n leg\'{\i}tima del estilo editorial, y la restricci\'{o}n temporal no aporta una ganancia evidente.
 
+\newpage
+\section{Parte 2: Conteo de palabras y visualizaciones}
+
+\subsection*{Preparaci\'{o}n: tokens limpios}
+
+Para los conteos de palabras de esta parte se construye una columna \texttt{Tokens} que parte de \texttt{CleanText} (Parte 1.C) y le aplica dos filtros adicionales:
+\begin{itemize}
+    \item \textbf{Stopwords en ingl\'{e}s} (lista de NLTK): \textit{the, of, to, and, in, ...}. Son las palabras m\'{a}s frecuentes del idioma y no diferencian un medio de otro, por lo que dominar\'{\i}an cualquier ranking sin aportar informaci\'{o}n.
+    \item \textbf{Identificadores del propio medio} detectados en 1.E (\textit{reuters, cnbc, nytimes, nyt, thehill, ...}). Si no se eliminaran, el ranking de palabras frecuentes de cada medio quedar\'{\i}a encabezado por el nombre del propio medio, lo cual es un resultado trivial y oculta las diferencias reales.
+\end{itemize}
+
+Adem\'{a}s, antes de tokenizar se remueven mediante regex las plantillas reiteradas (dateline de Reuters, firmas \textit{``Reporting by''} / \textit{``Editing by''}, footer legal de \textit{The Hill}, etc.). Si solo se filtraran las palabras sueltas, palabras leg\'{\i}timas como \textit{capitol} o \textit{hill} se perder\'{\i}an por estar dentro del footer; eliminando la frase completa solo se descarta el boilerplate y se preservan esas palabras cuando aparecen en contextos editoriales reales.
+
+\subsection{A. Palabras m\'{a}s frecuentes por medio}
+
+Se construye un ranking de las palabras m\'{a}s frecuentes para cada uno de los cinco medios. La frecuencia se reporta en t\'{e}rminos \textbf{relativos} (porcentaje sobre el total de tokens del medio), porque los vol\'{u}menes de texto son muy distintos entre medios y los conteos absolutos no son comparables.
+
+Se incluy\'{o} primero una versi\'{o}n \textbf{ingenua} (sobre \texttt{CleanText}, sin filtrar stopwords ni pistas) para evidenciar el problema: los rankings de los cinco medios resultan casi id\'{e}nticos, encabezados siempre por las mismas palabras funcionales del ingl\'{e}s (\textit{the, of, to, and, ...}). El gr\'{a}fico es poco informativo y no permite comparar nada entre medios.
+
+La versi\'{o}n \textbf{filtrada} (sobre \texttt{Tokens}, ya sin stopwords ni identificadores del medio) ya muestra diferencias claras: vocabulario financiero / de cable en Reuters y CNBC, vocabulario pol\'{\i}tico en The Hill, vocabulario m\'{a}s narrativo en NYT, y vocabulario de entretenimiento y celebridades en People. Como complemento se incluye un \textit{heatmap} con las top-10 palabras de cada medio puestas en la misma escala: as\'{\i} se ve, por ejemplo, que \textit{trump} o \textit{house} pesan muy distinto en The Hill que en People.
+
+\paragraph{Ideas para modificar la visualizaci\'{o}n (sin implementar).}
+\begin{itemize}
+    \item \textbf{Por secci\'{o}n tem\'{a}tica}: rehacer el top-N restringi\'{e}ndose a una misma \texttt{section} (por ejemplo \textit{politics}); lo que aparece son diferencias de estilo dentro del mismo tema y no diferencias de cobertura. Limitaci\'{o}n: \textit{The Hill} no reporta secci\'{o}n y \textit{People} cubre casi solo entretenimiento.
+    \item \textbf{Por fecha}: graficar la serie de tiempo (por mes o trimestre) de unas pocas palabras-clave (\textit{trump, biden, covid, election, ...}) por medio, para ver c\'{o}mo reacciona cada medio frente a un mismo evento; o comparar el top-N de un a\~{n}o contra el de otro dentro del mismo medio para detectar cambios de agenda.
+    \item \textbf{Por tipo de noticia}: usar \texttt{section} como proxy de tipo (\textit{opinion / business / politics / sports / ...}) y rehacer la visualizaci\'{o}n agrupando por tipo en lugar de por medio.
+\end{itemize}
+
+\subsection{B. Medios con mayor cantidad de palabras}
+
+Se cuenta el total de palabras (separadas por espacios sobre \texttt{CleanText}) por medio. La Figura~\ref{fig:2b} muestra dos vistas complementarias.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{chart_2b.png}
+\caption{Cantidad de palabras por medio. Izquierda: total acumulado. Derecha: promedio por art\'{\i}culo.}
+\label{fig:2b}
+\end{figure}
+
+\paragraph{Problema observado.} El gr\'{a}fico de la izquierda est\'{a} dominado por \textit{Reuters} y \textit{NYT} con cifras similares (~2,6 millones de palabras cada uno), seguidos a distancia por el resto. Pero esa lectura es enga\~{n}osa: \textit{Reuters} aporta tantas palabras porque tiene \textbf{muchos m\'{a}s art\'{\i}culos} que el resto (9.431 frente a 1.500--2.800 de los otros, ver Tabla~\ref{tab:top5}), no porque sus art\'{\i}culos sean largos. La m\'{e}trica ``total de palabras'' mezcla dos cosas distintas: cantidad de art\'{\i}culos y largo medio por art\'{\i}culo.
+
+\paragraph{Forma de resolverlo.} La m\'{e}trica adecuada para comparar el largo de las notas es el \textbf{promedio de palabras por art\'{\i}culo} (gr\'{a}fico de la derecha). Ah\'{\i} se ve un orden completamente distinto: \textit{NYT} es claramente el medio con notas m\'{a}s largas (917 palabras por art\'{\i}culo en promedio), seguido por \textit{The Hill} (574), \textit{CNBC} (463) y \textit{People} (426), mientras que \textit{Reuters} aparece \'{u}ltimo (279), consistente con su perfil de cable corto. El cambio de orden entre las dos vistas confirma que el total y el promedio responden preguntas distintas.
+
+\subsection{C. Matriz de menciones entre medios}
+
+Se construye una matriz $5 \times 5$ donde la entrada $(i, j)$ cuenta cu\'{a}ntas veces los art\'{\i}culos del medio $i$ mencionan al medio $j$. El conteo se hace sobre el texto original (sin \texttt{clean\_text}) para preservar may\'{u}sculas y poder distinguir, por ejemplo, el nombre propio \textit{``People''} (revista) de la palabra com\'{u}n \textit{``people''}.
+
+Para cada medio se defini\'{o} un patr\'{o}n regex con los nombres con los que aparece mencionado en los textos:
+\begin{itemize}
+    \item \textit{Reuters}: \texttt{Reuters} (case-insensitive).
+    \item \textit{The Hill}: \texttt{The Hill} o \texttt{TheHill}.
+    \item \textit{CNBC}: \texttt{CNBC}.
+    \item \textit{The New York Times}: \texttt{The New York Times}, \texttt{NYT} o \texttt{nytimes}.
+    \item \textit{People}: solo formas estrictas (\texttt{PEOPLE} en may\'{u}sculas, \texttt{People magazine}, \texttt{people.com}). Si se usara \textit{``people''} a secas se confundir\'{\i}a con la palabra com\'{u}n y la columna quedar\'{\i}a inflada artificialmente.
+\end{itemize}
+
+La Figura~\ref{fig:2c} muestra el resultado como heatmap. La diagonal (auto-menciones) se enmascara porque las auto-referencias son muy altas (Reuters se menciona a s\'{\i} mismo 11.623 veces) y aportan poco al objetivo de la matriz.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{chart_2c.png}
+\caption{Matriz de menciones entre medios. La entrada $(i, j)$ es la cantidad de veces que los art\'{\i}culos del medio $i$ mencionan al medio $j$. Diagonal enmascarada.}
+\label{fig:2c}
+\end{figure}
+
+\paragraph{Observaciones.}
+\begin{itemize}
+    \item \textbf{CNBC depende fuertemente de Reuters como fuente}: 1.199 menciones, muy por encima de cualquier otro par. Esto es consistente con lo observado en 1.E, donde un 24\% de los art\'{\i}culos de CNBC inclu\'{\i}an el dateline ``(Reuters)''. CNBC republica cables de Reuters con frecuencia.
+    \item \textbf{Las menciones no son sim\'{e}tricas}. \textit{The Hill} menciona a \textit{NYT} 180 veces, pero \textit{NYT} menciona a \textit{The Hill} solo 7 veces. \textit{The Hill} usa al NYT como fuente o referencia mucho m\'{a}s de lo que el NYT habla de \textit{The Hill}. Algo similar pasa con \textit{The Hill} citando a Reuters (123) versus Reuters citando a \textit{The Hill} (0).
+    \item \textbf{Reuters apenas menciona al resto}: 39 al NYT, 45 a CNBC, 0 a The Hill, 12 a People. Coherente con su estilo de cable: reporta hechos, no comenta lo que dijeron otros medios.
+    \item \textbf{People queda casi aislada en cuanto a menciones recibidas}: salvo CNBC que la menciona 66 veces (probablemente notas de entretenimiento o farandula), los dem\'{a}s la mencionan en cifras de un d\'{\i}gito.
+\end{itemize}
+
+\subsection{D. Preguntas propuestas}
+
+A partir de los datos analizados se proponen tres preguntas que podr\'{\i}an explorarse en trabajos posteriores, junto con un camino de an\'{a}lisis sin implementar.
+
+\paragraph{Pregunta 1 -- Largo de los art\'{\i}culos.}
+\textit{¿C\'{o}mo se distribuye el largo de los art\'{\i}culos dentro de cada medio? ¿Hay medios con largos muy homog\'{e}neos y otros con mucha varianza?}
+
+\textbf{Camino.} Aprovechando la columna \texttt{NumWords} calculada en 2.B, mirar las distribuciones por medio (mediana, desv\'{\i}o est\'{a}ndar y un boxplot por medio). El promedio mostrado en 2.B esconde la dispersi\'{o}n: un medio podr\'{\i}a tener un promedio similar a otro y aun as\'{\i} alternar entre cables muy cortos y notas muy largas. El boxplot separa ``medio que escribe siempre lo mismo de largo'' de ``medio que mezcla formatos''.
+
+\paragraph{Pregunta 2 -- Reciprocidad de las menciones.}
+\textit{¿Las menciones entre medios son rec\'{\i}procas? ¿Cu\'{a}les pares son sim\'{e}tricos y cu\'{a}les muy asim\'{e}tricos?}
+
+\textbf{Camino.} Comparar la matriz \texttt{mentions\_matrix} de 2.C con su traspuesta. Si la entrada $(i, j)$ es muy distinta de $(j, i)$, hay una asimetr\'{\i}a (el medio $i$ depende de $j$ como fuente pero no al rev\'{e}s). Como vimos en las observaciones, ya hay ind\'{\i}cios fuertes (\textit{The Hill} cita a \textit{NYT} 180 veces, \textit{NYT} a \textit{The Hill} solo 7); una inspecci\'{o}n par a par permitir\'{\i}a caracterizar mejor estas relaciones de ``quien usa a quien como fuente''.
+
+\paragraph{Pregunta 3 -- Vocabulario distintivo por medio.}
+\textit{M\'{a}s all\'{a} de los identificadores obvios (nombres del propio medio, firmas), ¿cada medio tiene un vocabulario propio que lo diferencia del resto?}
+
+\textbf{Camino.} Partiendo de los \texttt{Tokens} ya filtrados en 2.A, calcular para cada palabra su frecuencia relativa en cada medio y quedarse con las palabras que aparecen mucho en un medio y poco en los otros (alta diferencia entre el m\'{a}ximo y el m\'{\i}nimo de su frecuencia entre los cinco medios). El heatmap de 2.A ya hace una versi\'{o}n inicial de esto sobre el top-N de cada medio; el camino aqu\'{\i} es extenderlo a todo el vocabulario para detectar palabras distintivas que no necesariamente est\'{a}n en el top, pero s\'{\i} son caracter\'{\i}sticas de un \'{u}nico medio.
+
 \end{document}
