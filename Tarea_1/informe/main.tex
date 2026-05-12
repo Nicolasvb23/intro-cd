@@ -91,7 +91,7 @@
 \vspace{0.3cm}
 \begin{itemize}[label={}, left=0pt]
     \item Tom\'{a}s Alejo Spoturno Gonzalez, 5.165.789-6
-    \item Nicol\'{a}s Buero
+    \item Nicol\'{a}s Buero, 5.000.105-4
 \end{itemize}
 \end{flushleft}
 
@@ -157,7 +157,7 @@ Las columnas con datos faltantes m\'{a}s significativos son \texttt{section} y \
 Adem\'{a}s de los faltantes, se identificaron los siguientes problemas mediante chequeos manuales:
 
 \begin{itemize}
-    \item \textbf{Redundancia entre \texttt{idx} y \texttt{article\_idx}}: ambas columnas son id\'{e}nticas en 0 filas (es decir, son id\'enticas en todas las filas). Una de las dos es redundante.
+    \item \textbf{Redundancia entre \texttt{idx} y \texttt{article\_idx}}: la diferencia entre ambas columnas es cero en todas las filas, es decir, contienen exactamente el mismo valor en cada registro. Una de las dos es redundante.
     \item \textbf{Formato heterog\'{e}neo en \texttt{date}}: conviven los formatos \texttt{YYYY-MM-DD} y \texttt{YYYY-MM-DD HH:MM:SS} en distintas filas. Esto obliga a usar \texttt{format='mixed'} al parsear.
     \item \textbf{Tipo de \texttt{month}}: la columna \texttt{month} se almacena como cadena de texto (\texttt{str}), no como entero, a pesar de contener \'{u}nicamente valores num\'{e}ricos del 1 al 12. Lo mismo ocurre con \texttt{year} y \texttt{day}. Conviene convertirlas a entero si se las quisiera utilizar para operaciones num\'{e}ricas, aunque como se discute m\'{a}s abajo son redundantes con \texttt{date}.
     \item \textbf{Redundancia entre \texttt{date} y \texttt{year}, \texttt{month}, \texttt{day}}: las tres \'{u}ltimas son derivables exactamente de \texttt{date}. Se verific\'{o} consistencia (a\~{n}o, mes y d\'{\i}a coinciden con el \texttt{date} parseado en todos los registros donde ambos existen). Por lo tanto pueden eliminarse sin p\'{e}rdida de informaci\'{o}n.
@@ -201,7 +201,7 @@ Para visualizar la actividad de los cinco medios a lo largo del tiempo, se gener
 \label{fig:temporal}
 \end{figure}
 
-\textbf{Observaciones generales.} Los cinco medios cubren aproximadamente el mismo per\'{\i}odo (de 2016-01-01 a 2020-04-01). La cobertura es relativamente uniforme a lo largo de los a\~{n}os, sin saltos abruptos que sugieran cortes en la ingesta del dataset. \textit{Reuters} y \textit{The Hill} son los que aportan m\'{a}s art\'{\i}culos por mes, mientras que \textit{People} mantiene un volumen m\'{a}s bajo y estable.
+\textbf{Observaciones generales.} Los cinco medios cubren aproximadamente el mismo per\'{\i}odo (de 2016-01-01 a 2020-04-01), aunque con vol\'{u}menes muy distintos. \textit{Reuters} domina ampliamente en cantidad de art\'{\i}culos publicados por mes, con un nivel varias veces superior al resto. Le siguen, en un escal\'{o}n intermedio similar entre s\'{\i}, \textit{NYT}, \textit{CNBC} y \textit{The Hill}; \textit{People} aparece como el medio con menor volumen mensual. La cobertura es relativamente uniforme a lo largo de los a\~{n}os, sin saltos abruptos que sugieran cortes en la ingesta del dataset, m\'{a}s all\'{a} de la ca\'{\i}da natural en el extremo derecho de la serie por el corte en abril de 2020 (el dataset finaliza ese mes y por eso 2020 muestra menos art\'{\i}culos acumulados que los a\~{n}os completos previos).
 
 Para detectar patrones c\'{\i}clicos m\'{a}s finos, se calcul\'{o} el promedio de art\'{\i}culos por d\'{\i}a de la semana y por mes del a\~{n}o (Figura~\ref{fig:ciclico}).
 
