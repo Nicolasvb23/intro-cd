@@ -116,7 +116,7 @@ Mayo 2026
 
 Este informe documenta la resoluci\'{o}n de la Tarea~1 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). El trabajo se realiza sobre un subconjunto muestreado del dataset abierto \textit{All the News 2.1 -- Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta primera entrega es \textbf{cargar, explorar y limpiar} los datos, con vistas a una futura tarea de clasificaci\'{o}n autom\'{a}tica de textos por medio de prensa.
 
-El c\'{o}digo se encuentra en el notebook \texttt{Tarea\_1/2026\_template\_tarea1.ipynb} del repositorio. En este informe se reportan los resultados y las decisiones tomadas; las visualizaciones y tablas se reproducen a partir del notebook ejecutado.
+El c\'{o}digo que genera los resultados, tablas y figuras est\'{a} en el notebook \texttt{Tarea\_1/2026\_template\_tarea1.ipynb} del repositorio.
 
 % ══════════════════════════════════════════════════════════════════════
 % PARTE 1
@@ -127,7 +127,7 @@ El c\'{o}digo se encuentra en el notebook \texttt{Tarea\_1/2026\_template\_tarea
 
 \subsubsection*{Composici\'{o}n del DataFrame}
 
-El DataFrame cargado contiene 30.213 art\'{\i}culos y 12 columnas. Las columnas son: \texttt{idx}, \texttt{article\_idx}, \texttt{date}, \texttt{year}, \texttt{month}, \texttt{day}, \texttt{author}, \texttt{title}, \texttt{article}, \texttt{url}, \texttt{section}, \texttt{publication}. Cada fila representa un art\'{\i}culo de noticias, con metadatos (\texttt{publication}, \texttt{author}, \texttt{date}, \texttt{section}, \texttt{url}) y el contenido textual (\texttt{title}, \texttt{article}).
+El DataFrame tiene 30.213 filas (una por art\'{\i}culo) y 12 columnas: el contenido textual (\texttt{title}, \texttt{article}), metadatos del art\'{\i}culo (\texttt{publication}, \texttt{author}, \texttt{date}, \texttt{section}, \texttt{url}), los componentes desglosados de la fecha (\texttt{year}, \texttt{month}, \texttt{day}) y dos columnas de \'{\i}ndice (\texttt{idx}, \texttt{article\_idx}).
 
 \subsubsection*{Datos faltantes por columna}
 
@@ -214,11 +214,11 @@ Para detectar patrones c\'{\i}clicos m\'{a}s finos, se calcul\'{o} el promedio d
 
 \textbf{Patrones c\'{\i}clicos.}
 \begin{itemize}
-    \item En los \textbf{d\'{\i}as de la semana} se observa una ca\'{\i}da clara los s\'{a}bados y domingos en los medios de tipo agencia y pol\'{\i}tica (\textit{Reuters}, \textit{The Hill}, \textit{CNBC}, \textit{NYT}). \textit{People}, en cambio, mantiene un volumen m\'{a}s parejo, consistente con un perfil editorial de entretenimiento que no depende de la agenda institucional de la semana laboral.
+    \item En los \textbf{d\'{\i}as de la semana} se observa una ca\'{\i}da clara los s\'{a}bados y domingos en los medios de tipo agencia y pol\'{\i}tica (\textit{Reuters}, \textit{The Hill}, \textit{CNBC}, \textit{NYT}). \textit{People}, en cambio, publica de forma m\'{a}s pareja durante toda la semana, lo que tiene sentido porque su agenda (celebrities, entretenimiento) no depende del calendario laboral.
     \item Por \textbf{mes del a\~{n}o} no hay un patr\'{o}n estacional tan marcado: los medios cubren noticias de forma continua durante todo el a\~{n}o.
 \end{itemize}
 
-No se realiz\'{o} ning\'{u}n test estad\'{\i}stico; los comentarios se basan exclusivamente en la inspecci\'{o}n visual de las gr\'{a}ficas.
+Estas observaciones surgen de mirar las gr\'{a}ficas, sin ning\'{u}n test estad\'{\i}stico de por medio.
 
 
 \subsection{C. Limpieza de texto: \texttt{clean\_text}}
@@ -292,21 +292,21 @@ Adem\'{a}s, el cuerpo captura cosas que el t\'{\i}tulo no: vocabulario t\'{e}cni
 
 \subsection{E. Pistas que identifican al medio de prensa}
 
-Una preocupaci\'{o}n importante para una futura tarea de clasificaci\'{o}n por medio es la presencia de \textbf{marcas en el texto que delaten al medio de manera directa}, sin requerir analizar el estilo editorial. Si esas marcas existen, una clasificadora puede ``hacer trampa'' aprendiendo a detectar la marca en lugar de aprender el estilo.
+Una preocupaci\'{o}n importante para una futura tarea de clasificaci\'{o}n por medio es la presencia de \textbf{marcas en el texto que delaten al medio de manera directa}, sin requerir analizar el estilo editorial. Si esas marcas existen, una clasificadora puede aprender a detectarlas en lugar de aprender el estilo editorial.
 
 Revisando manualmente una muestra aleatoria de art\'{\i}culos por medio y luego cuantificando con expresiones regulares sobre todo el corpus, se identificaron las siguientes pistas:
 
 \subsubsection*{Reuters}
 \begin{itemize}
-    \item \textbf{Dateline al inicio del cuerpo}: el 91.9\% de los art\'{\i}culos contiene la marca \texttt{CIUDAD (Reuters) -} en el cuerpo. Es la firma m\'{a}s reconocible de la agencia.
+    \item \textbf{Dateline al inicio del cuerpo}: el 91.9\% de los art\'{\i}culos contiene la marca \texttt{CIUDAD (Reuters) -} en el cuerpo.
     \item \textbf{Firma de cierre}: el 56.1\% termina con \texttt{Reporting by X; Editing by Y}.
     \item \textbf{Plantilla de \textit{Further company coverage}}: aparece al final en el 24.2\% de los art\'{\i}culos.
 \end{itemize}
-Son tres marcas acumuladas que identifican a \textit{Reuters} de forma casi inequ\'{\i}voca.
+Entre las tres marcas se cubre la enorme mayor\'{\i}a de los art\'{\i}culos del medio.
 
 \subsubsection*{The Hill}
 \begin{itemize}
-    \item \textbf{Sufijo en el t\'{\i}tulo}: el 100.0\% de los t\'{\i}tulos termina con ``\texttt{| TheHill}''. Es una marca 100\%-sistem\'{a}tica.
+    \item \textbf{Sufijo en el t\'{\i}tulo}: el 100\% de los t\'{\i}tulos termina con ``\texttt{| TheHill}''.
     \item \textbf{Footer legal}: el 99.4\% de los art\'{\i}culos termina con el mismo footer (\texttt{Capitol Hill Publishing Corp.} con direcci\'{o}n, tel\'{e}fonos y copyright).
     \item \textbf{URL \texttt{thehill.com} en cuerpo}: marginal pero presente.
     \item \textbf{Artefacto de scraping}: en algunos art\'{\i}culos los nombres de pol\'{\i}ticos quedan duplicados (\textit{John McCainJohn Sidney McCain}), por una superposici\'{o}n del tag de link con el texto.
@@ -318,7 +318,7 @@ Son tres marcas acumuladas que identifican a \textit{Reuters} de forma casi ineq
     \item \textbf{Auto-menci\'{o}n}: el 34.8\% menciona ``CNBC'' en el cuerpo.
     \item \textbf{Footer Mad Money}: bloque recurrente que termina con \texttt{madcap@cnbc.com}.
 \end{itemize}
-No hay un boilerplate tan uniforme como en \textit{Reuters} o \textit{The Hill} para el contenido original.
+A diferencia de \textit{Reuters} o \textit{The Hill}, no hay un \'{u}nico boilerplate que aparezca en la mayor\'{\i}a del contenido propio del medio.
 
 \subsubsection*{The New York Times}
 \begin{itemize}
@@ -357,7 +357,7 @@ People tells/told PEOPLE & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 28.4\% \\
 \end{tabularx}
 \end{table}
 
-Como era esperable, los patrones tienen alta concentraci\'{o}n en su medio de origen y baja presencia en los dem\'{a}s; la \'{u}nica excepci\'{o}n notable es el dateline \texttt{(Reuters)} que tambi\'{e}n aparece en \textit{CNBC} por la republicaci\'{o}n de cables.
+Cada patr\'{o}n aparece sobre todo en su medio de origen y casi no en los dem\'{a}s. La \'{u}nica excepci\'{o}n es el dateline \texttt{(Reuters)}, que tambi\'{e}n aparece en \textit{CNBC} porque \textit{CNBC} republica cables de la agencia.
 
 \subsubsection*{Adem\'{a}s, la columna \texttt{url}}
 
@@ -368,7 +368,7 @@ El dominio de la \texttt{url} identifica al medio al 100\% en todos los casos. S
 Para una tarea de clasificaci\'{o}n por estilo editorial, \textbf{conviene reducir el impacto de estas marcas}. Las dos opciones consideradas son:
 
 \begin{enumerate}
-    \item \textbf{Eliminarlas como plantillas} (regex sobre el texto crudo) antes del conteo de palabras. Esta es la decisi\'{o}n adoptada para la Parte 2 (no documentada en este informe): se definen patrones espec\'{\i}ficos para el dateline de \textit{Reuters}, el footer legal de \textit{The Hill}, el handle \texttt{@NYTopinion} de \textit{NYT}, etc.
+    \item \textbf{Eliminarlas como plantillas} (regex sobre el texto crudo) antes del conteo de palabras. Es lo que se aplica en la Parte 2: regex espec\'{\i}ficas para el dateline de \textit{Reuters}, el footer legal de \textit{The Hill}, el handle \texttt{@NYTopinion} de \textit{NYT}, etc.
     \item \textbf{Eliminar tokens aislados} (\texttt{reuters}, \texttt{cnbc}, \texttt{nytimes}, \texttt{thehill}, \texttt{nyt}, \texttt{people}) cuando aparecen como palabras sueltas tras la tokenizaci\'{o}n.
 \end{enumerate}
 
@@ -386,7 +386,7 @@ La idea es interesante en principio: si se comparan art\'{\i}culos del mismo tem
     \item \textbf{\textit{People} cubre exclusivamente entretenimiento} (\textit{tv, movies, celebrity, style}) y no tiene art\'{\i}culos de pol\'{\i}tica ni econom\'{\i}a, que son los temas dominantes en los otros cuatro medios. Restringir por una secci\'{o}n com\'{u}n equivaldr\'{\i}a a eliminar \textit{People} del an\'{a}lisis.
 \end{itemize}
 
-Adem\'{a}s, conceptualmente, \textbf{el tema que cubre cada medio es parte de su identidad editorial}: \textit{Reuters} es una agencia de cable financiera, \textit{People} es una revista de celebrities. Esa diferencia tem\'{a}tica no es ``ruido'', sino una caracter\'{\i}stica real del medio que una clasificadora puede (y deber\'{\i}a) aprovechar.
+Adem\'{a}s, \textbf{el tema que cubre cada medio es parte de su identidad editorial}: \textit{Reuters} es una agencia de cables financieros y \textit{People} una revista de celebrities. Esa diferencia tem\'{a}tica es informaci\'{o}n \'{u}til para clasificar, no algo que convenga descartar.
 
 La Tabla~\ref{tab:secciones} resume las secciones m\'{a}s frecuentes en cada medio.
 
@@ -434,7 +434,7 @@ Se construye un ranking de las palabras m\'{a}s frecuentes para cada uno de los 
 
 Se incluy\'{o} primero una versi\'{o}n \textbf{ingenua} (sobre \texttt{CleanText}, sin filtrar stopwords ni pistas) para evidenciar el problema: los rankings de los cinco medios resultan casi id\'{e}nticos, encabezados siempre por las mismas palabras funcionales del ingl\'{e}s (\textit{the, of, to, and, ...}). El gr\'{a}fico es poco informativo y no permite comparar nada entre medios.
 
-La versi\'{o}n \textbf{filtrada} (sobre \texttt{Tokens}, ya sin stopwords ni identificadores del medio) ya muestra diferencias claras: vocabulario financiero / de cable en Reuters y CNBC, vocabulario pol\'{\i}tico en The Hill, vocabulario m\'{a}s narrativo en NYT, y vocabulario de entretenimiento y celebridades en People. Como complemento se incluye un \textit{heatmap} con las top-10 palabras de cada medio puestas en la misma escala: as\'{\i} se ve, por ejemplo, que \textit{trump} o \textit{house} pesan muy distinto en The Hill que en People.
+La versi\'{o}n \textbf{filtrada} (sobre \texttt{Tokens}, ya sin stopwords ni identificadores del medio) muestra diferencias claras entre medios: vocabulario financiero y de cable en Reuters y CNBC, vocabulario pol\'{\i}tico en The Hill, m\'{a}s narrativo en NYT, y de entretenimiento y celebrities en People. Tambi\'{e}n se arm\'{o} un \textit{heatmap} con las top-10 palabras de cada medio en la misma escala, donde se ve por ejemplo que \textit{trump} o \textit{house} pesan muy distinto en The Hill que en People.
 
 \paragraph{Ideas para modificar la visualizaci\'{o}n (sin implementar).}
 \begin{itemize}
@@ -454,11 +454,11 @@ Se cuenta el total de palabras (separadas por espacios sobre \texttt{CleanText})
 \label{fig:2b}
 \end{figure}
 
-\paragraph{Problema observado.} El gr\'{a}fico de la izquierda est\'{a} dominado por \textit{Reuters} y \textit{NYT} con cifras similares (~2,6 millones de palabras cada uno), seguidos a distancia por el resto. Pero esa lectura es enga\~{n}osa: \textit{Reuters} aporta tantas palabras porque tiene \textbf{muchos m\'{a}s art\'{\i}culos} que el resto (9.431 frente a 1.500--2.800 de los otros, ver Tabla~\ref{tab:top5}), no porque sus art\'{\i}culos sean largos. La m\'{e}trica ``total de palabras'' mezcla dos cosas distintas: cantidad de art\'{\i}culos y largo medio por art\'{\i}culo.
+\paragraph{Problema observado.} El gr\'{a}fico de la izquierda est\'{a} dominado por \textit{Reuters} y \textit{NYT} con cifras parecidas (alrededor de 2,6 millones de palabras cada uno), seguidos a distancia por el resto. Esa lectura es enga\~{n}osa: \textit{Reuters} aporta tantas palabras porque tiene \textbf{muchos m\'{a}s art\'{\i}culos} que el resto (9.431 frente a 1.500--2.800 de los otros, ver Tabla~\ref{tab:top5}), no porque sus art\'{\i}culos sean largos. El total de palabras mezcla dos cosas distintas en una sola cifra: cantidad de art\'{\i}culos y largo medio por art\'{\i}culo.
 
-\paragraph{Forma de resolverlo.} La m\'{e}trica adecuada para comparar el largo de las notas es el \textbf{promedio de palabras por art\'{\i}culo} (gr\'{a}fico del centro). Ah\'{\i} se ve un orden completamente distinto: \textit{NYT} es claramente el medio con notas m\'{a}s largas (917 palabras por art\'{\i}culo en promedio), seguido por \textit{The Hill} (574), \textit{CNBC} (463) y \textit{People} (426), mientras que \textit{Reuters} aparece \'{u}ltimo (279), consistente con su perfil de cable corto. El cambio de orden entre las dos vistas confirma que el total y el promedio responden preguntas distintas.
+\paragraph{Forma de resolverlo.} La m\'{e}trica adecuada para comparar el largo de las notas es el \textbf{promedio de palabras por art\'{\i}culo} (gr\'{a}fico del centro). Con ese cambio el orden se invierte: \textit{NYT} pasa a ser el medio con notas m\'{a}s largas (917 palabras por art\'{\i}culo en promedio), seguido por \textit{The Hill} (574), \textit{CNBC} (463) y \textit{People} (426), y \textit{Reuters} queda \'{u}ltimo (279), lo que encaja con su perfil de cable corto. El cambio de orden entre las dos vistas deja claro que el total y el promedio responden preguntas distintas.
 
-\paragraph{Riqueza l\'{e}xica.} El tercer gr\'{a}fico (palabras distintas por art\'{\i}culo en promedio) no lo pide la consigna pero aporta una idea simple de \textbf{riqueza l\'{e}xica}: dos medios pueden escribir notas del mismo largo y aun as\'{\i} usar vocabulario muy distinto. El orden coincide con el del largo medio --- \textit{NYT} encabeza con 403 palabras distintas por art\'{\i}culo, seguido por \textit{The Hill} (293), \textit{CNBC} (229), \textit{People} (218) y \textit{Reuters} (151) --- pero la brecha relativa es a\'{u}n m\'{a}s marcada: \textit{NYT} usa $\sim$2,7$\times$ m\'{a}s vocabulario distinto que \textit{Reuters} por nota. Esto es consistente con \textit{Reuters} como cable formulaico (mismas estructuras repetidas) y \textit{NYT} como medio con notas largas y tem\'{a}ticamente variadas.
+\paragraph{Riqueza l\'{e}xica.} El tercer gr\'{a}fico (palabras distintas por art\'{\i}culo en promedio) no lo pide la consigna pero aporta una idea simple de \textbf{riqueza l\'{e}xica}: dos medios pueden escribir notas del mismo largo y aun as\'{\i} usar vocabulario muy distinto. El orden coincide con el del largo medio --- \textit{NYT} encabeza con 403 palabras distintas por art\'{\i}culo, seguido por \textit{The Hill} (293), \textit{CNBC} (229), \textit{People} (218) y \textit{Reuters} (151) --- pero la brecha relativa es a\'{u}n m\'{a}s marcada: \textit{NYT} usa casi 2,7 veces m\'{a}s vocabulario distinto por nota que \textit{Reuters}. Tiene sentido: \textit{Reuters} repite estructuras de cable, mientras que \textit{NYT} escribe notas largas y de temas variados.
 
 \subsection{C. Matriz de menciones entre medios}
 
@@ -488,9 +488,9 @@ La diagonal (auto-menciones) se enmascara porque las auto-referencias son muy al
 \begin{itemize}
     \item \textbf{CNBC depende fuertemente de Reuters como fuente.} En conteo absoluto son 1.199 menciones, muy por encima de cualquier otro par. La vista normalizada lo precisa todav\'{\i}a m\'{a}s: \textbf{el 31,8\% de los art\'{\i}culos de CNBC mencionan a Reuters}, una tasa enorme comparada con cualquier otro par. Esto es consistente con lo observado en 1.E, donde un 24\% de los art\'{\i}culos de CNBC inclu\'{\i}an el dateline ``(Reuters)'': CNBC republica o referencia cables de Reuters con frecuencia.
     \item \textbf{Las menciones no son sim\'{e}tricas.} \textit{The Hill} menciona a \textit{NYT} en 6,5\% de sus art\'{\i}culos, pero \textit{NYT} menciona a \textit{The Hill} en solo 0,2\%. \textit{The Hill} usa al NYT como fuente o referencia mucho m\'{a}s de lo que el NYT habla de \textit{The Hill}. Algo similar pasa con \textit{The Hill} citando a \textit{Reuters} (3,0\% de sus art\'{\i}culos) frente a \textit{Reuters} citando a \textit{The Hill} (0\%).
-    \item \textbf{Reuters apenas menciona al resto.} En cifras normalizadas, menciona a cualquier otro medio en menos del 1\% de sus art\'{\i}culos (0,3\% a NYT, 0,3\% a CNBC, 0,9\% a People, 0\% a The Hill). Coherente con su estilo de cable: reporta hechos, no comenta lo que dijeron otros medios.
+    \item \textbf{Reuters apenas menciona al resto.} En cifras normalizadas, menciona a cualquier otro medio en menos del 1\% de sus art\'{\i}culos (0,3\% a NYT, 0,3\% a CNBC, 0,9\% a People, 0\% a The Hill). Como agencia de cables, su trabajo es informar hechos m\'{a}s que comentar lo que dicen otros medios.
     \item \textbf{NYT y People escriben de forma m\'{a}s aut\'{o}noma.} Mirando la fila de cada uno, en el resto de la matriz casi todas las entradas est\'{a}n por debajo del 3\%. NYT y People apenas usan a los dem\'{a}s medios como fuente, contrario a CNBC y The Hill.
-    \item \textbf{La normalizaci\'{o}n cambia el orden.} En el conteo absoluto The Hill aparec\'{\i}a citando mucho a NYT (180 menciones), pero al normalizar (6,5\% de sus art\'{\i}culos) se ve que es una fracci\'{o}n peque\~{n}a comparada con la dependencia de CNBC con Reuters (31,8\%). La matriz normalizada corrige el sesgo por volumen.
+    \item \textbf{Normalizar cambia qu\'{e} par aparece como dominante.} En el conteo absoluto, The Hill citando a NYT (180 menciones) llamaba la atenci\'{o}n, pero al normalizar baja a 6,5\% de los art\'{\i}culos de The Hill, una fracci\'{o}n chica frente al 31,8\% de CNBC mencionando a Reuters. La matriz normalizada corrige el sesgo por volumen total de art\'{\i}culos.
 \end{itemize}
 
 \subsection{D. Preguntas propuestas}
@@ -500,12 +500,12 @@ A partir de los datos analizados se proponen tres preguntas que podr\'{\i}an exp
 \paragraph{Pregunta 1 -- Largo de los art\'{\i}culos.}
 \textit{¿C\'{o}mo se distribuye el largo de los art\'{\i}culos dentro de cada medio? ¿Hay medios con largos muy homog\'{e}neos y otros con mucha varianza?}
 
-\textbf{Camino.} Aprovechando la columna \texttt{NumWords} calculada en 2.B, mirar las distribuciones por medio (mediana, desv\'{\i}o est\'{a}ndar y un boxplot por medio). El promedio mostrado en 2.B esconde la dispersi\'{o}n: un medio podr\'{\i}a tener un promedio similar a otro y aun as\'{\i} alternar entre cables muy cortos y notas muy largas. El boxplot separa ``medio que escribe siempre lo mismo de largo'' de ``medio que mezcla formatos''.
+\textbf{Camino.} Aprovechando la columna \texttt{NumWords} calculada en 2.B, mirar las distribuciones por medio (mediana, desv\'{\i}o est\'{a}ndar y un boxplot por medio). El promedio mostrado en 2.B esconde la dispersi\'{o}n: un medio puede tener un promedio similar a otro y aun as\'{\i} alternar entre cables muy cortos y notas muy largas. El boxplot permite distinguir medios con largos parejos de medios que mezclan formatos.
 
 \paragraph{Pregunta 2 -- Reciprocidad de las menciones.}
 \textit{¿Las menciones entre medios son rec\'{\i}procas? ¿Cu\'{a}les pares son sim\'{e}tricos y cu\'{a}les muy asim\'{e}tricos?}
 
-\textbf{Camino.} Comparar la matriz \texttt{mentions\_matrix} de 2.C con su traspuesta. Si la entrada $(i, j)$ es muy distinta de $(j, i)$, hay una asimetr\'{\i}a (el medio $i$ depende de $j$ como fuente pero no al rev\'{e}s). Como vimos en las observaciones, ya hay ind\'{\i}cios fuertes (\textit{The Hill} cita a \textit{NYT} 180 veces, \textit{NYT} a \textit{The Hill} solo 7); una inspecci\'{o}n par a par permitir\'{\i}a caracterizar mejor estas relaciones de ``quien usa a quien como fuente''.
+\textbf{Camino.} Comparar la matriz \texttt{mentions\_matrix} de 2.C con su traspuesta. Si la entrada $(i, j)$ es muy distinta de $(j, i)$, hay una asimetr\'{\i}a: el medio $i$ depende de $j$ como fuente pero no al rev\'{e}s. Las observaciones de 2.C ya muestran ind\'{\i}cios fuertes (\textit{The Hill} cita a \textit{NYT} 180 veces, \textit{NYT} a \textit{The Hill} solo 7); una inspecci\'{o}n par a par permitir\'{\i}a caracterizar mejor qu\'{e} medios usan a qu\'{e} otros medios como fuente.
 
 \paragraph{Pregunta 3 -- Vocabulario distintivo por medio.}
 \textit{M\'{a}s all\'{a} de los identificadores obvios (nombres del propio medio, firmas), ¿cada medio tiene un vocabulario propio que lo diferencia del resto?}
