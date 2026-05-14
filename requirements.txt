@@ -6,3 +6,4 @@ networkx
 nltk
 scikit-learn
 datasets
+numpy

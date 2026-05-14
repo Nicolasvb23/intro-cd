@@ -116,7 +116,7 @@ Mayo 2026
 
 Este informe documenta la resoluci\'{o}n de la Tarea~1 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). El trabajo se realiza sobre un subconjunto muestreado del dataset abierto \textit{All the News 2.1 -- Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta primera entrega es \textbf{cargar, explorar y limpiar} los datos, con vistas a una futura tarea de clasificaci\'{o}n autom\'{a}tica de textos por medio de prensa.
 
-El c\'{o}digo que genera los resultados, tablas y figuras est\'{a} en el notebook \texttt{Tarea\_1/2026\_template\_tarea1.ipynb} del repositorio.
+El c\'{o}digo que genera los resultados, tablas y figuras est\'{a} en el notebook \texttt{Tarea\_1/2026\_tarea1.ipynb} del repositorio p\'{u}blico \url{https://github.com/Nicolasvb23/intro-cd}.
 
 % ══════════════════════════════════════════════════════════════════════
 % PARTE 1
@@ -436,6 +436,13 @@ Se incluy\'{o} primero una versi\'{o}n \textbf{ingenua} (sobre \texttt{CleanText
 
 La versi\'{o}n \textbf{filtrada} (sobre \texttt{Tokens}, ya sin stopwords ni identificadores del medio) muestra diferencias claras entre medios: vocabulario financiero y de cable en Reuters y CNBC, vocabulario pol\'{\i}tico en The Hill, m\'{a}s narrativo en NYT, y de entretenimiento y celebrities en People. Tambi\'{e}n se arm\'{o} un \textit{heatmap} con las top-10 palabras de cada medio en la misma escala, donde se ve por ejemplo que \textit{trump} o \textit{house} pesan muy distinto en The Hill que en People.
 
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth,height=0.88\textheight,keepaspectratio]{chart_2a.png}
+\caption{Top 20 palabras por medio. Arriba: versi\'{o}n ingenua sobre \texttt{CleanText} (dominada por \textit{stopwords}, rankings casi id\'{e}nticos entre medios). Centro: versi\'{o}n filtrada sobre \texttt{Tokens} (sin \textit{stopwords} ni identificadores del medio). Abajo: \textit{heatmap} con la frecuencia relativa (\%) de las top-10 palabras de cada medio en la misma escala.}
+\label{fig:2a}
+\end{figure}
+
 \paragraph{Ideas para modificar la visualizaci\'{o}n (sin implementar).}
 \begin{itemize}
     \item \textbf{Por secci\'{o}n tem\'{a}tica}: rehacer el top-N restringi\'{e}ndose a una misma \texttt{section} (por ejemplo \textit{politics}); lo que aparece son diferencias de estilo dentro del mismo tema y no diferencias de cobertura. Limitaci\'{o}n: \textit{The Hill} no reporta secci\'{o}n y \textit{People} cubre casi solo entretenimiento.
@@ -458,7 +465,7 @@ Se cuenta el total de palabras (separadas por espacios sobre \texttt{CleanText})
 
 \paragraph{Forma de resolverlo.} La m\'{e}trica adecuada para comparar el largo de las notas es el \textbf{promedio de palabras por art\'{\i}culo} (gr\'{a}fico del centro). Con ese cambio el orden se invierte: \textit{NYT} pasa a ser el medio con notas m\'{a}s largas (917 palabras por art\'{\i}culo en promedio), seguido por \textit{The Hill} (574), \textit{CNBC} (463) y \textit{People} (426), y \textit{Reuters} queda \'{u}ltimo (279), lo que encaja con su perfil de cable corto. El cambio de orden entre las dos vistas deja claro que el total y el promedio responden preguntas distintas.
 
-\paragraph{Riqueza l\'{e}xica.} El tercer gr\'{a}fico (palabras distintas por art\'{\i}culo en promedio) no lo pide la consigna pero aporta una idea simple de \textbf{riqueza l\'{e}xica}: dos medios pueden escribir notas del mismo largo y aun as\'{\i} usar vocabulario muy distinto. El orden coincide con el del largo medio --- \textit{NYT} encabeza con 403 palabras distintas por art\'{\i}culo, seguido por \textit{The Hill} (293), \textit{CNBC} (229), \textit{People} (218) y \textit{Reuters} (151) --- pero la brecha relativa es a\'{u}n m\'{a}s marcada: \textit{NYT} usa casi 2,7 veces m\'{a}s vocabulario distinto por nota que \textit{Reuters}. Tiene sentido: \textit{Reuters} repite estructuras de cable, mientras que \textit{NYT} escribe notas largas y de temas variados.
+\paragraph{Riqueza l\'{e}xica.} El tercer gr\'{a}fico (palabras distintas por art\'{\i}culo en promedio) no lo pide la consigna pero aporta una idea simple de \textbf{riqueza l\'{e}xica}: dos medios pueden escribir notas del mismo largo y aun as\'{\i} usar vocabulario muy distinto. El orden coincide con el del largo medio \textit{NYT} encabeza con 403 palabras distintas por art\'{\i}culo, seguido por \textit{The Hill} (293), \textit{CNBC} (229), \textit{People} (218) y \textit{Reuters} (151) pero la brecha relativa es a\'{u}n m\'{a}s marcada: \textit{NYT} usa casi 2,7 veces m\'{a}s vocabulario distinto por nota que \textit{Reuters}. Tiene sentido: \textit{Reuters} repite estructuras de cable, mientras que \textit{NYT} escribe notas largas y de temas variados.
 
 \subsection{C. Matriz de menciones entre medios}
 
@@ -498,17 +505,17 @@ La diagonal (auto-menciones) se enmascara porque las auto-referencias son muy al
 A partir de los datos analizados se proponen tres preguntas que podr\'{\i}an explorarse en trabajos posteriores, junto con un camino de an\'{a}lisis sin implementar.
 
 \paragraph{Pregunta 1 -- Largo de los art\'{\i}culos.}
-\textit{¿C\'{o}mo se distribuye el largo de los art\'{\i}culos dentro de cada medio? ¿Hay medios con largos muy homog\'{e}neos y otros con mucha varianza?}
+\textit{?`C\'{o}mo se distribuye el largo de los art\'{\i}culos dentro de cada medio? ?`Hay medios con largos muy homog\'{e}neos y otros con mucha varianza?}
 
 \textbf{Camino.} Aprovechando la columna \texttt{NumWords} calculada en 2.B, mirar las distribuciones por medio (mediana, desv\'{\i}o est\'{a}ndar y un boxplot por medio). El promedio mostrado en 2.B esconde la dispersi\'{o}n: un medio puede tener un promedio similar a otro y aun as\'{\i} alternar entre cables muy cortos y notas muy largas. El boxplot permite distinguir medios con largos parejos de medios que mezclan formatos.
 
 \paragraph{Pregunta 2 -- Reciprocidad de las menciones.}
-\textit{¿Las menciones entre medios son rec\'{\i}procas? ¿Cu\'{a}les pares son sim\'{e}tricos y cu\'{a}les muy asim\'{e}tricos?}
+\textit{?`Las menciones entre medios son rec\'{\i}procas? ?`Cu\'{a}les pares son sim\'{e}tricos y cu\'{a}les muy asim\'{e}tricos?}
 
 \textbf{Camino.} Comparar la matriz \texttt{mentions\_matrix} de 2.C con su traspuesta. Si la entrada $(i, j)$ es muy distinta de $(j, i)$, hay una asimetr\'{\i}a: el medio $i$ depende de $j$ como fuente pero no al rev\'{e}s. Las observaciones de 2.C ya muestran ind\'{\i}cios fuertes (\textit{The Hill} cita a \textit{NYT} 180 veces, \textit{NYT} a \textit{The Hill} solo 7); una inspecci\'{o}n par a par permitir\'{\i}a caracterizar mejor qu\'{e} medios usan a qu\'{e} otros medios como fuente.
 
 \paragraph{Pregunta 3 -- Vocabulario distintivo por medio.}
-\textit{M\'{a}s all\'{a} de los identificadores obvios (nombres del propio medio, firmas), ¿cada medio tiene un vocabulario propio que lo diferencia del resto?}
+\textit{M\'{a}s all\'{a} de los identificadores obvios (nombres del propio medio, firmas), ?`cada medio tiene un vocabulario propio que lo diferencia del resto?}
 
 \textbf{Camino.} Partiendo de los \texttt{Tokens} ya filtrados en 2.A, calcular para cada palabra su frecuencia relativa en cada medio y quedarse con las palabras que aparecen mucho en un medio y poco en los otros (alta diferencia entre el m\'{a}ximo y el m\'{\i}nimo de su frecuencia entre los cinco medios). El heatmap de 2.A ya hace una versi\'{o}n inicial de esto sobre el top-N de cada medio; el camino aqu\'{\i} es extenderlo a todo el vocabulario para detectar palabras distintivas que no necesariamente est\'{a}n en el top, pero s\'{\i} son caracter\'{\i}sticas de un \'{u}nico medio.
 
