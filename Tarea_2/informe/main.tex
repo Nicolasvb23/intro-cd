@@ -127,45 +127,7 @@ El c\'{o}digo que genera los resultados est\'{a} en el notebook \texttt{Tarea\_2
 
 \subsection{Preparaci\'{o}n del dataset}
 
-\subsubsection*{Limpieza previa}
-
-El dataset de partida es el mismo que en la Tarea~1: 30.213 art\'{\i}culos distribuidos en 26 medios de prensa. Antes de filtrar por medio de prensa, se aplicaron cuatro correcciones sobre problemas de calidad identificados en la Tarea~1:
-
-\begin{enumerate}
-    \item \textbf{Valores placeholder en \texttt{title}}: la columna \texttt{title} figura como \texttt{non-null} en el \texttt{DataFrame} de pandas (no tiene \texttt{NaN}), pero en la pr\'{a}ctica algunas filas contienen cadenas sin informaci\'{o}n real, como \texttt{"Not found"}, \texttt{"[Not Found]"}, \texttt{"N/A"} o guiones repetidos. Estos valores no se capturan con un simple \texttt{isnull()}, sino que requieren un chequeo por patr\'{o}n. Se implement\'{o} la funci\'{o}n \texttt{is\_placeholder(val)} basada en una expresi\'{o}n regular que detecta estas cadenas en cualquiera de sus variantes. Los art\'{\i}culos con t\'{\i}tulo placeholder se reportan pero no se eliminan, dado que para la clasificaci\'{o}n de esta tarea se usa el cuerpo del art\'{\i}culo, no el t\'{\i}tulo.
-
-    \item \textbf{Filas con \texttt{article} nulo o placeholder}: 1.176 filas (3,89\% del total) ten\'{\i}an \texttt{article} nulo (\texttt{NaN}), y adicionalmente algunas contendr\'{\i}an cadenas placeholder. Sin texto que procesar, estas filas no son clasificables y se eliminan.
-
-    \item \textbf{Filas con \texttt{publication} nula}: 141 filas (0,47\%) no ten\'{\i}an medio de prensa asignado. Como \texttt{publication} es la variable objetivo $y$ de la clasificaci\'{o}n, estas filas no son utilizables y se eliminan.
-
-    \item \textbf{Duplicados}: se elimin\'{o} toda fila cuya combinaci\'{o}n \texttt{(title, article)} apareciera m\'{a}s de una vez. Art\'{\i}culos repetidos que cayeran en ambos conjuntos (train y test) inflar\'{\i}an artificialmente el \textit{accuracy} del modelo.
-\end{enumerate}
-
-La Tabla~\ref{tab:limpieza} resume el efecto de cada paso de limpieza.
-
-\begin{table}[H]
-\centering
-\caption{Efecto de la limpieza previa sobre el tama\~{n}o del dataset.}
-\label{tab:limpieza}
-\begin{tabular}{l r r}
-\toprule
-\textbf{Paso} & \textbf{Filas eliminadas} & \textbf{Filas restantes} \\
-\midrule
-Dataset original & --- & 30.213 \\
-Eliminar \texttt{publication} nula/placeholder & 141 & 30.072 \\
-Eliminar \texttt{article} nulo/placeholder & $\sim$1.176 & $\sim$28.896 \\
-Eliminar duplicados & [TODO] & [TODO] \\
-\midrule
-\textbf{Dataset limpio (\texttt{df\_clean})} & \textbf{[TODO] total} & \textbf{[TODO]} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection*{Funci\'{o}n \texttt{clean\_text}}
-
-Se reutiliz\'{o} la funci\'{o}n \texttt{clean\_text} desarrollada en la Tarea~1, sin modificaciones. La funci\'{o}n aplica los siguientes pasos en orden: eliminaci\'{o}n de la primera l\'{\i}nea (cabecera repetida), conversi\'{o}n a min\'{u}sculas, eliminaci\'{o}n de URLs, eliminaci\'{o}n de puntuaci\'{o}n y caracteres no alfanum\'{e}ricos (reemplazando por espacio para no pegar palabras), eliminaci\'{o}n de n\'{u}meros aislados, y normalizaci\'{o}n de espacios.
-
-A diferencia de lo que se hizo en la Parte~2 de la Tarea~1, aqu\'{\i} \textbf{no se eliminan \textit{stopwords} ni identificadores del medio} en la etapa de limpieza: esas decisiones se toman a nivel del vectorizador (\texttt{CountVectorizer} o \texttt{TfidfVectorizer}) y son parte del an\'{a}lisis de la Secci\'{o}n~\ref{sec:pca}.
+El proceso de limpieza de datos y la funci\'{o}n \texttt{clean\_text} son los mismos que en la Tarea~1, a los que se remite para el detalle. En resumen, sobre el dataset original de 30.213 art\'{\i}culos se eliminaron 141 filas con \texttt{publication} nula, 1.176 con \texttt{article} nulo o placeholder, y 13 duplicados exactos, resultando en \textbf{29.024 art\'{\i}culos limpios}. La funci\'{o}n \texttt{clean\_text} aplica los mismos pasos que en la entrega anterior (eliminaci\'{o}n de cabecera, minusc\'{u}las, URLs, puntuaci\'{o}n, n\'{u}meros aislados y normalizaci\'{o}n de espacios), sin agregar filtrado de \textit{stopwords} ni identificadores de medios en esta etapa, ya que esas decisiones se toman a nivel del vectorizador y son parte del an\'{a}lisis de la Secci\'{o}n~\ref{sec:pca}.
 
 \subsubsection*{Selecci\'{o}n de los tres medios principales}
 
@@ -179,26 +141,26 @@ El an\'{a}lisis de esta tarea se restringe a los \textbf{tres medios con mayor c
 \toprule
 \textbf{Medio} & \textbf{Art\'iculos} & \textbf{\% del total (top~3)} \\
 \midrule
-Reuters & $\sim$9.280 & $\sim$62\% \\
-The New York Times & $\sim$2.830 & $\sim$19\% \\
-CNBC & $\sim$2.610 & $\sim$17\% \\
+Reuters & 9.266 & 63,2\% \\
+The New York Times & 2.805 & 19,1\% \\
+CNBC & 2.578 & 17,6\% \\
 \midrule
-\textbf{Total top~3} & $\sim$\textbf{14.720} & \textbf{100\%} \\
+\textbf{Total top~3} & \textbf{14.649} & \textbf{100\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Los tres medios coinciden con los tres primeros del top~5 de la Tarea~1. El dataset resultante presenta un \textbf{desbalance pronunciado}: \textit{Reuters} acumula cerca del 62\% de los art\'{\i}culos, frente al 19\% de \textit{NYT} y el 17\% de \textit{CNBC}. Esto tiene implicancias sobre las m\'{e}tricas de evaluaci\'{o}n que se discuten en la Parte~2.
+Los tres medios coinciden con los tres primeros del top~5 de la Tarea~1. El dataset resultante presenta un \textbf{desbalance pronunciado}: \textit{Reuters} acumula el 63,2\% de los art\'{\i}culos, frente al 19,1\% de \textit{NYT} y el 17,6\% de \textit{CNBC}. Esto tiene implicancias sobre las m\'{e}tricas de evaluaci\'{o}n que se discuten en la Parte~2.
 
 \subsubsection*{Partici\'{o}n train/test}
 
-El dataset de los tres medios se dividi\'{o} en un conjunto de \textbf{entrenamiento (70\%)} y un conjunto de \textbf{test (30\%)}, utilizando muestreo estratificado por medio de prensa (\texttt{stratify=y}). La estratificaci\'{o}n garantiza que la proporci\'{o}n de art\'{\i}culos de cada medio sea la misma en ambos conjuntos. Se fij\'{o} \texttt{random\_state=42} para reproducibilidad.
+El dataset de los tres medios se dividi\'{o} en un conjunto de \textbf{entrenamiento (70\%)} y un conjunto de \textbf{test (30\%)}, utilizando muestreo estratificado por medio de prensa (\texttt{stratify=y}). La estratificaci\'{o}n garantiza que la proporci\'{o}n de art\'{\i}culos de cada medio sea la misma en ambos conjuntos. Se fij\'{o} \texttt{random\_state=23} para reproducibilidad.
 
 \subsection{Verificaci\'{o}n del balance de clases}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{chart_balance.png}
+\includegraphics[width=0.95\textwidth]{imagenes/chart_balance.png}
 \caption{Proporci\'{o}n de art\'iculos de cada medio en los conjuntos de entrenamiento (izquierda) y test (derecha). La estratificaci\'{o}n garantiza distribuciones id\'{e}nticas en ambos conjuntos.}
 \label{fig:balance}
 \end{figure}
@@ -256,13 +218,13 @@ El vectorizador \texttt{TfidfVectorizer} se ajusta \'{u}nicamente sobre el conju
 
 \subsubsection*{Consideraciones de implementaci\'{o}n}
 
-El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz como densa para poder centrarla. Con un vocabulario de decenas de miles de palabras y miles de documentos, eso implicar\'{\i}a varios gigabytes en memoria. Por este motivo se utiliz\'{o} \texttt{TruncatedSVD} de scikit-learn, que computa las componentes principales directamente sobre la representaci\'{o}n \textit{sparse} sin densificarla. El resultado es matem\'{a}ticamente equivalente al PCA para estos efectos.
+El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz TF-IDF como densa para poder centrarla. Con el vocabulario completo de 85.152 palabras y 10.254 documentos de entrenamiento, esto supone aproximadamente 6,9~GB en RAM. En esta tarea se opt\'{o} por utilizar directamente \texttt{sklearn.decomposition.PCA}, materializando la matriz completa con \texttt{.toarray()}. Como alternativa sin restricciones de memoria, \texttt{TruncatedSVD} opera sobre la representaci\'{o}n \textit{sparse} sin densificarla, aunque sin centrar los datos previamente.
 
 \subsubsection*{Resultados con la configuraci\'{o}n base}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{chart_pca_base.png}
+\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_base.png}
 \caption{Mapa PCA (2 primeras componentes) sobre TF-IDF base, coloreado por medio de prensa.}
 \label{fig:pca_base}
 \end{figure}
@@ -275,7 +237,7 @@ Las dos primeras componentes explican solo [TODO]\% de la varianza total, lo que
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{chart_pca_configs.png}
+\includegraphics[width=\textwidth]{imagenes/chart_pca_configs.png}
 \caption{PCA con cuatro configuraciones distintas del \texttt{TfidfVectorizer}: base, con \textit{stop words}, sin IDF y con bigramas.}
 \label{fig:pca_configs}
 \end{figure}
@@ -295,7 +257,7 @@ Al agregar bigramas el vocabulario se expande varios veces (incluye ahora todas 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{chart_pca_variance.png}
+\includegraphics[width=\textwidth]{imagenes/chart_pca_variance.png}
 \caption{Varianza explicada por cada componente principal (izquierda) y varianza acumulada (derecha) para los primeros 10 componentes sobre la configuraci\'{o}n TF-IDF base.}
 \label{fig:pca_variance}
 \end{figure}
