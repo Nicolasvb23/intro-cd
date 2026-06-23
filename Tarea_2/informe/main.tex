@@ -224,81 +224,51 @@ El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_base.png}
-\caption{Mapa PCA (2 primeras componentes) sobre TF-IDF base, coloreado por medio de prensa.}
-\label{fig:pca_base}
-\end{figure}
-
-La Figura~\ref{fig:pca_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. Se observa que \textit{Reuters} forma una nube claramente separada del resto, especialmente a lo largo de la primera componente. \textit{NYT} y \textit{CNBC} presentan mayor superposici\'{o}n entre s\'{\i}, aunque con cierta separaci\'{o}n. Las dos primeras componentes explican solo el 4,1\% de la varianza total, lo que indica que \textbf{no es posible separar los tres medios de forma perfecta con \'{u}nicamente 2 componentes}: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n.
-
-Para entender qu\'{e} palabras impulsan cada componente, se construy\'{o} un \textbf{biplot} que superpone los vectores de \textit{loading} de las 15 palabras con mayor magnitud en el plano PC1-PC2. La longitud de cada flecha indica cu\'{a}nto contribuye esa palabra a las componentes; su direcci\'{o}n indica hacia qu\'{e} medio ``apunta'' esa palabra.
-
-\begin{figure}[H]
-\centering
 \includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_base.png}
-\caption{Biplot sobre TF-IDF base: puntos coloreados por medio y flechas con las 15 palabras de mayor loading.}
+\caption{Biplot sobre TF-IDF base: puntos coloreados por medio de prensa y flechas con las 15 palabras de mayor loading en el plano PC1-PC2.}
 \label{fig:biplot_base}
 \end{figure}
 
-La Figura~\ref{fig:biplot_base} confirma que la primera componente est\'{a} dominada por t\'{e}rminos de boilerplate de \textit{Reuters} (e.g., \texttt{reuters}, \texttt{said}), lo que explica la separaci\'{o}n casi perfecta de ese medio a lo largo de PC1. Las palabras que contribuyen a PC2 tienden a separar \textit{NYT} de \textit{CNBC} y suelen ser de contenido tem\'{a}tico.
+La Figura~\ref{fig:biplot_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. Se observa que \textit{Reuters} forma una nube claramente separada del resto, especialmente a lo largo de la primera componente. \textit{NYT} y \textit{CNBC} presentan mayor superposici\'{o}n entre s\'{\i}, aunque con cierta separaci\'{o}n. Las dos primeras componentes explican solo el 4,1\% de la varianza total, lo que indica que \textbf{no es posible separar los tres medios de forma perfecta con \'{u}nicamente 2 componentes}: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n. Las flechas superponen los vectores de \textit{loading} de las 15 palabras con mayor magnitud; su longitud indica cu\'{a}nto contribuye esa palabra y su direcci\'{o}n hacia qu\'{e} lado del plano ``apunta'' esa palabra.
+
+La Figura~\ref{fig:biplot_base} muestra que las flechas de mayor loading apuntan mayoritariamente hacia el lado \textbf{positivo} de PC1, que es donde se concentran \textit{NYT} y \textit{CNBC}. \textit{Reuters} queda en el extremo \textbf{negativo} de PC1, separado del resto. Esto indica que los t\'{e}rminos con mayor peso en la primera componente son palabras m\'{a}s presentes en \textit{NYT} y \textit{CNBC}; los art\'{\i}culos de \textit{Reuters} se caracterizan por tener valores bajos para esas dimensiones. Los labels se superponen y son dif\'{\i}ciles de leer individualmente, lo cual es consistente con que varios t\'{e}rminos contribuyen de forma similar a PC1 sin que uno solo domine claramente.
 
 \subsubsection*{Comparaci\'{o}n de configuraciones}
 
-Se analiza el efecto de tres modificaciones al \texttt{TfidfVectorizer}. Para cada configuraci\'{o}n se muestra el mapa PCA y el biplot correspondiente.
+Se analiza el efecto de tres modificaciones al \texttt{TfidfVectorizer}. Para cada configuraci\'{o}n se muestra el biplot correspondiente.
 
 \paragraph{a) Filtrado de \textit{stop words} (\texttt{stop\_words='english'}).}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_stopwords.png}
-\caption{PCA con \texttt{stop\_words='english'}.}
-\label{fig:pca_stopwords}
-\end{figure}
-
-\begin{figure}[H]
-\centering
 \includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_stopwords.png}
-\caption{Biplot con \texttt{stop\_words='english'}: al eliminar palabras funcionales, los loadings quedan dominados por t\'{e}rminos de contenido.}
+\caption{Biplot con \texttt{stop\_words='english'}: al eliminar palabras funcionales, los loadings quedan dominados por t\'{e}rminos de contenido. PC1 explica 1,1\% de la varianza.}
 \label{fig:biplot_stopwords}
 \end{figure}
 
-Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), el vocabulario se reduce y los vectores quedan dominados por t\'{e}rminos de contenido. La separaci\'{o}n entre medios tiende a mantenerse o mejorar levemente. En el biplot (Figura~\ref{fig:biplot_stopwords}) desaparecen palabras como \textit{``the''}, \textit{``of''}, \textit{``in''}, y quedan expuestos t\'{e}rminos caracter\'{\i}sticos de cada medio.
+Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), palabras como \textit{``the''}, \textit{``of''} o \textit{``in''} desaparecen del vocabulario y no pueden aparecer como flechas en el biplot. En la Figura~\ref{fig:biplot_stopwords} los t\'{e}rminos de mayor loading visibles son \textit{``reuters''} y \textit{``percent''}, que son palabras de contenido caracter\'{\i}sticas de ese medio. Contra lo intuitivo, PC1 cae de 3,2\% a 1,1\%: al eliminar los t\'{e}rminos m\'{a}s frecuentes se reduce la concentraci\'{o}n de varianza en la primera direcci\'{o}n, distribuy\'{e}ndola entre m\'{a}s componentes.
 
 \paragraph{b) Sin IDF (\texttt{use\_idf=False}).}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_noidf.png}
-\caption{PCA con \texttt{use\_idf=False} (TF puro).}
-\label{fig:pca_noidf}
-\end{figure}
-
-\begin{figure}[H]
-\centering
 \includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_noidf.png}
-\caption{Biplot con \texttt{use\_idf=False}: las flechas est\'{a}n dominadas por palabras funcionales ubicuas.}
+\caption{Biplot con \texttt{use\_idf=False}: una flecha larga domina PC1, correspondiente a \textit{``the''}. PC1 explica 14,5\% de la varianza.}
 \label{fig:biplot_noidf}
 \end{figure}
 
-Con IDF desactivado, los vectores contienen la frecuencia relativa del t\'{e}rmino (TF puro). Las palabras muy comunes recuperan el peso que IDF les quitaba. El biplot (Figura~\ref{fig:biplot_noidf}) ilustra con claridad el problema: las flechas de mayor magnitud corresponden a palabras funcionales como \textit{``the''}, \textit{``to''}, \textit{``of''}, que son equidistribuidas entre los tres medios y no aportan ninguna discriminaci\'{o}n. El mapa PCA muestra una separaci\'{o}n notablemente peor.
+Con IDF desactivado, las palabras muy comunes recuperan el peso que el factor inverso les quitaba. El biplot (Figura~\ref{fig:biplot_noidf}) ilustra el problema con claridad: aparece una \'{u}nica flecha dominante, notablemente m\'{a}s larga que el resto, correspondiente a \textit{``the''}. PC1 salta a 14,5\% de varianza explicada (frente al 3,2\% de la configuraci\'{o}n base) porque ahora la primera componente captura principalmente variaci\'{o}n en la frecuencia de ese art\'{\i}culo, que es equidistribuida entre los tres medios y no aporta discriminaci\'{o}n. Esto ilustra concretamente por qu\'{e} el factor IDF es fundamental en clasificaci\'{o}n de texto.
 
 \paragraph{c) Bigramas (\texttt{ngram\_range=(1,2)}).}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_bigrams.png}
-\caption{PCA con \texttt{ngram\_range=(1,2)} y \texttt{max\_features=40.000}. El vocabulario de bigramas es demasiado grande para densificarse sin l\'{\i}mite, por lo que se acota a los 50.000 t\'{e}rminos m\'{a}s frecuentes.}
-\label{fig:pca_bigrams}
-\end{figure}
-
-\begin{figure}[H]
-\centering
 \includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_bigrams.png}
-\caption{Biplot con bigramas: aparecen expresiones compuestas caracter\'{\i}sticas de cada medio.}
+\caption{Biplot con \texttt{ngram\_range=(1,2)} y \texttt{max\_features=60.000}: el vocabulario incluye secuencias de dos palabras consecutivas. PC1 explica 3,0\% de la varianza.}
 \label{fig:biplot_bigrams}
 \end{figure}
 
-Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=40.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) revela expresiones compuestas caracter\'{\i}sticas: bigramas como \textit{``reuters reporting''}, \textit{``new york''} o \textit{``wall street''} pasan a ser features expl\'{\i}citas que no exist\'{\i}an con unigramas.
+Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=60.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) conserva una estructura similar a la configuraci\'{o}n base: \textit{Reuters} aparece en el extremo negativo de PC1 y \textit{``reuters''} figura entre los t\'{e}rminos de mayor loading. La varianza explicada por PC1 (3,0\%) es pr\'{a}cticamente igual a la base (3,2\%), lo que indica que la adici\'{o}n de bigramas no altera cualitativamente la separaci\'{o}n en las primeras dos dimensiones.
 
 \subsubsection*{Varianza explicada}
 
