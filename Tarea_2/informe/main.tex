@@ -114,7 +114,7 @@ Junio 2026
 % ══════════════════════════════════════════════════════════════════════
 \section{Introducci\'{o}n}
 
-Este informe documenta la resoluci\'{o}n de la Tarea~2 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). La tarea es continuaci\'{o}n directa de la Tarea~1 y utiliza el mismo dataset: un subconjunto muestreado del corpus abierto \textit{All the News 2.1 -- Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta entrega es \textbf{construir y evaluar clasificadores autom\'{a}ticos de texto} que identifiquen a qu\'{e} medio pertenece cada art\'{\i}culo, partiendo de representaciones num\'{e}ricas del texto.
+Este informe documenta la resoluci\'{o}n de la Tarea~2 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). La tarea es continuaci\'{o}n directa de la Tarea~1 y utiliza el mismo dataset: un subconjunto muestreado del corpus abierto \textit{All the News 2.1 --- Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta entrega es \textbf{construir y evaluar clasificadores autom\'{a}ticos de texto} que identifiquen a qu\'{e} medio pertenece cada art\'{\i}culo, partiendo de representaciones num\'{e}ricas del texto.
 
 El trabajo se estructura en dos partes. La Parte~1 cubre la preparaci\'{o}n de los datos, la representaci\'{o}n num\'{e}rica del texto mediante \textit{Bag of Words} y TF-IDF, y una exploraci\'{o}n visual con PCA. La Parte~2 cubre el entrenamiento, la validaci\'{o}n y la comparaci\'{o}n de modelos de clasificaci\'{o}n.
 
@@ -177,17 +177,17 @@ La representaci\'{o}n \textit{Bag of Words} (BoW) convierte cada documento en un
 
 Se ajust\'{o} un \texttt{CountVectorizer} con par\'{a}metros por defecto sobre el conjunto de entrenamiento. La matriz resultante tiene dimensiones $[\text{n\_docs} \times \text{n\_palabras}]$, donde:
 \begin{itemize}
-    \item \textbf{Filas}: la cantidad de art\'{\i}culos en el conjunto de entrenamiento ([TODO] art\'{\i}culos).
-    \item \textbf{Columnas}: el tama\~{n}o del vocabulario aprendido sobre el train ([TODO] palabras distintas).
+    \item \textbf{Filas}: 10.254 art\'{\i}culos en el conjunto de entrenamiento.
+    \item \textbf{Columnas}: 84.358 palabras distintas en el vocabulario aprendido sobre el train.
 \end{itemize}
 
 \subsubsection*{Por qu\'{e} es una matriz \textit{sparse}}
 
 Si se almacenara como una matriz densa (todos los valores en memoria), la matriz BoW ocupar\'{\i}a aproximadamente:
 \[
-[\text{TODO}] \times [\text{TODO}] \times 8\ \text{bytes} \approx [\text{TODO}]\ \text{MB}
+10.254 \times 84.358 \times 8\ \text{bytes} \approx 6.920\ \text{MB}
 \]
-Esto ser\'{\i}a inmanejable incluso con este dataset reducido. Sin embargo, la gran mayor\'{\i}a de las entradas son cero: la densidad de la matriz es del orden del 0,2\%---0,4\%, lo que significa que m\'{a}s del 99\% de sus valores son cero. Ninguna nota usa m\'{a}s de unos cientos de palabras distintas, mientras que el vocabulario total tiene decenas de miles. Las matrices \textit{sparse} almacenan \'{u}nicamente los valores no-nulos y sus posiciones (formato CSR), lo que reduce el uso de memoria en varios \'{o}rdenes de magnitud.
+Esto ser\'{\i}a inmanejable incluso con este dataset reducido. Sin embargo, la gran mayor\'{\i}a de las entradas son cero: la densidad de la matriz es del 0,247\%, lo que significa que m\'{a}s del 99\% de sus valores son cero. Ninguna nota usa m\'{a}s de unos cientos de palabras distintas, mientras que el vocabulario total tiene decenas de miles. Las matrices \textit{sparse} almacenan \'{u}nicamente los valores no-nulos y sus posiciones (formato CSR), reduciendo el uso de memoria de 6.920~MB a tan solo 25,7~MB.
 
 Si en lugar de 14.000 art\'{\i}culos tuvi\'{e}ramos el dataset completo de 1,8 millones de art\'{\i}culos del corpus original y un vocabulario de cientos de miles de palabras, la matriz densa ser\'{\i}a completamente inviable en cualquier equipo de c\'{o}mputo est\'{a}ndar.
 
@@ -199,7 +199,7 @@ Un \textbf{n-grama} es una secuencia contigua de $n$ tokens (palabras o caracter
 
 \subsubsection*{La transformaci\'{o}n TF-IDF}
 
-El principal problema de BoW es que las palabras muy frecuentes en todo el corpus (art\'{\i}culos, preposiciones, conjunciones) dominan los vectores aunque no aporten informaci\'{o}n discriminante entre medios. TF-IDF (\textit{Term Frequency -- Inverse Document Frequency}) corrige esto ponderando cada conteo por la siguiente expresi\'{o}n:
+El principal problema de BoW es que las palabras muy frecuentes en todo el corpus (art\'{\i}culos, preposiciones, conjunciones) dominan los vectores aunque no aporten informaci\'{o}n discriminante entre medios. TF-IDF (\textit{Term Frequency --- Inverse Document Frequency}) corrige esto ponderando cada conteo por la siguiente expresi\'{o}n:
 
 \[
 \text{TF-IDF}(t, d) = \text{TF}(t, d) \times \text{IDF}(t)
@@ -218,7 +218,7 @@ El vectorizador \texttt{TfidfVectorizer} se ajusta \'{u}nicamente sobre el conju
 
 \subsubsection*{Consideraciones de implementaci\'{o}n}
 
-El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz TF-IDF como densa para poder centrarla. Con el vocabulario completo de 85.152 palabras y 10.254 documentos de entrenamiento, esto supone aproximadamente 6,9~GB en RAM. En esta tarea se opt\'{o} por utilizar directamente \texttt{sklearn.decomposition.PCA}, materializando la matriz completa con \texttt{.toarray()}. Como alternativa sin restricciones de memoria, \texttt{TruncatedSVD} opera sobre la representaci\'{o}n \textit{sparse} sin densificarla, aunque sin centrar los datos previamente.
+El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz TF-IDF como densa para poder centrarla. Con el vocabulario completo de 84.358 palabras y 10.254 documentos de entrenamiento, esto supone aproximadamente 6,9~GB en RAM. En esta tarea se opt\'{o} por utilizar directamente \texttt{sklearn.decomposition.PCA}, materializando la matriz completa con \texttt{.toarray()}. Como alternativa sin restricciones de memoria, \texttt{TruncatedSVD} opera sobre la representaci\'{o}n \textit{sparse} sin densificarla, aunque sin centrar los datos previamente.
 
 \subsubsection*{Resultados con la configuraci\'{o}n base}
 
@@ -229,29 +229,76 @@ El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar 
 \label{fig:pca_base}
 \end{figure}
 
-La Figura~\ref{fig:pca_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. Se observa que \textit{Reuters} forma una nube claramente separada del resto, especialmente a lo largo de la primera componente. Esto es esperable dado que \textit{Reuters} tiene pistas l\'{e}xicas muy marcadas que se discuten m\'{a}s adelante. \textit{NYT} y \textit{CNBC} presentan mayor superposici\'{o}n entre s\'{\i}, aunque con cierta separaci\'{o}n.
+La Figura~\ref{fig:pca_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. Se observa que \textit{Reuters} forma una nube claramente separada del resto, especialmente a lo largo de la primera componente. \textit{NYT} y \textit{CNBC} presentan mayor superposici\'{o}n entre s\'{\i}, aunque con cierta separaci\'{o}n. Las dos primeras componentes explican solo [TODO]\% de la varianza total, lo que indica que \textbf{no es posible separar los tres medios de forma perfecta con \'{u}nicamente 2 componentes}: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n.
 
-Las dos primeras componentes explican solo [TODO]\% de la varianza total, lo que indica que \textbf{no es posible separar los tres medios de forma perfecta con \'{u}nicamente 2 componentes}. Los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n.
-
-\subsubsection*{Comparaci\'{o}n de configuraciones}
+Para entender qu\'{e} palabras impulsan cada componente, se construy\'{o} un \textbf{biplot} que superpone los vectores de \textit{loading} de las 15 palabras con mayor magnitud en el plano PC1-PC2. La longitud de cada flecha indica cu\'{a}nto contribuye esa palabra a las componentes; su direcci\'{o}n indica hacia qu\'{e} medio ``apunta'' esa palabra.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{imagenes/chart_pca_configs.png}
-\caption{PCA con cuatro configuraciones distintas del \texttt{TfidfVectorizer}: base, con \textit{stop words}, sin IDF y con bigramas.}
-\label{fig:pca_configs}
+\includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_base.png}
+\caption{Biplot sobre TF-IDF base: puntos coloreados por medio y flechas con las 15 palabras de mayor loading.}
+\label{fig:biplot_base}
 \end{figure}
 
-La Figura~\ref{fig:pca_configs} compara las cuatro configuraciones pedidas. Las observaciones principales son:
+La Figura~\ref{fig:biplot_base} confirma que la primera componente est\'{a} dominada por t\'{e}rminos de boilerplate de \textit{Reuters} (e.g., \texttt{reuters}, \texttt{said}), lo que explica la separaci\'{o}n casi perfecta de ese medio a lo largo de PC1. Las palabras que contribuyen a PC2 tienden a separar \textit{NYT} de \textit{CNBC} y suelen ser de contenido tem\'{a}tico.
+
+\subsubsection*{Comparaci\'{o}n de configuraciones}
+
+Se analiza el efecto de tres modificaciones al \texttt{TfidfVectorizer}. Para cada configuraci\'{o}n se muestra el mapa PCA y el biplot correspondiente.
 
 \paragraph{a) Filtrado de \textit{stop words} (\texttt{stop\_words='english'}).}
-Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), el vocabulario se reduce y los vectores quedan dominados por t\'{e}rminos de contenido. La separaci\'{o}n entre medios tiende a mejorar levemente porque se eliminan dimensiones que son equidistribuidas entre todos los documentos y no aportan discriminaci\'{o}n. La varianza explicada por las primeras dos componentes suele aumentar respecto a la configuraci\'{o}n base.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_stopwords.png}
+\caption{PCA con \texttt{stop\_words='english'}.}
+\label{fig:pca_stopwords}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_stopwords.png}
+\caption{Biplot con \texttt{stop\_words='english'}: al eliminar palabras funcionales, los loadings quedan dominados por t\'{e}rminos de contenido.}
+\label{fig:biplot_stopwords}
+\end{figure}
+
+Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), el vocabulario se reduce y los vectores quedan dominados por t\'{e}rminos de contenido. La separaci\'{o}n entre medios tiende a mantenerse o mejorar levemente. En el biplot (Figura~\ref{fig:biplot_stopwords}) desaparecen palabras como \textit{``the''}, \textit{``of''}, \textit{``in''}, y quedan expuestos t\'{e}rminos caracter\'{\i}sticos de cada medio.
 
 \paragraph{b) Sin IDF (\texttt{use\_idf=False}).}
-Con IDF desactivado, los vectores contienen directamente la frecuencia relativa del t\'{e}rmino en el documento (TF puro). Las palabras muy comunes recuperan el peso que IDF les quitaba. La separaci\'{o}n entre medios se deteriora notablemente porque los t\'{e}rminos ubicuos vuelven a dominar las componentes principales, reduciendo la varianza explicada en las primeras componentes y comprimiendo los puntos en un espacio m\'{a}s denso y menos separable.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_noidf.png}
+\caption{PCA con \texttt{use\_idf=False} (TF puro).}
+\label{fig:pca_noidf}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_noidf.png}
+\caption{Biplot con \texttt{use\_idf=False}: las flechas est\'{a}n dominadas por palabras funcionales ubicuas.}
+\label{fig:biplot_noidf}
+\end{figure}
+
+Con IDF desactivado, los vectores contienen la frecuencia relativa del t\'{e}rmino (TF puro). Las palabras muy comunes recuperan el peso que IDF les quitaba. El biplot (Figura~\ref{fig:biplot_noidf}) ilustra con claridad el problema: las flechas de mayor magnitud corresponden a palabras funcionales como \textit{``the''}, \textit{``to''}, \textit{``of''}, que son equidistribuidas entre los tres medios y no aportan ninguna discriminaci\'{o}n. El mapa PCA muestra una separaci\'{o}n notablemente peor.
 
 \paragraph{c) Bigramas (\texttt{ngram\_range=(1,2)}).}
-Al agregar bigramas el vocabulario se expande varios veces (incluye ahora todas las secuencias de dos palabras consecutivas). Los vectores resultantes capturan m\'{a}s contexto local. La separaci\'{o}n en el PCA puede mejorar o mantenerse similar a la base, pero el costo computacional aumenta considerablemente. Patrones como \textit{``reuters reporting''} o \textit{``new york''} pasan a ser features expl\'{\i}citas.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_bigrams.png}
+\caption{PCA con \texttt{ngram\_range=(1,2)} y \texttt{max\_features=50.000}. El vocabulario de bigramas es demasiado grande para densificarse sin l\'{\i}mite, por lo que se acota a los 50.000 t\'{e}rminos m\'{a}s frecuentes.}
+\label{fig:pca_bigrams}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagenes/chart_biplot_bigrams.png}
+\caption{Biplot con bigramas: aparecen expresiones compuestas caracter\'{\i}sticas de cada medio.}
+\label{fig:biplot_bigrams}
+\end{figure}
+
+Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=50.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) revela expresiones compuestas caracter\'{\i}sticas: bigramas como \textit{``reuters reporting''}, \textit{``new york''} o \textit{``wall street''} pasan a ser features expl\'{\i}citas que no exist\'{\i}an con unigramas.
 
 \subsubsection*{Varianza explicada}
 
