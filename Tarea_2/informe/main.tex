@@ -114,7 +114,7 @@ Junio 2026
 % ══════════════════════════════════════════════════════════════════════
 \section{Introducci\'{o}n}
 
-Este informe documenta la resoluci\'{o}n de la Tarea~2 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). La tarea es continuaci\'{o}n directa de la Tarea~1 y utiliza el mismo dataset: un subconjunto muestreado del corpus abierto \textit{All the News 2.1 --- Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta entrega es \textbf{construir y evaluar clasificadores autom\'{a}ticos de texto} que identifiquen a qu\'{e} medio pertenece cada art\'{\i}culo, partiendo de representaciones num\'{e}ricas del texto.
+Este informe documenta la resoluci\'{o}n de la Tarea~2 del curso \textit{Introducci\'{o}n a la Ciencia de Datos} (edici\'{o}n 2026). La tarea es continuaci\'{o}n directa de la Tarea~1 y utiliza el mismo dataset: un subconjunto muestreado del corpus abierto \textit{All the News 2.1 - Component One}, que contiene art\'{\i}culos de noticias publicados en distintos medios de prensa. El objetivo de esta entrega es \textbf{construir y evaluar clasificadores autom\'{a}ticos de texto} que identifiquen a qu\'{e} medio pertenece cada art\'{\i}culo, partiendo de representaciones num\'{e}ricas del texto.
 
 El trabajo se estructura en dos partes. La Parte~1 cubre la preparaci\'{o}n de los datos, la representaci\'{o}n num\'{e}rica del texto mediante \textit{Bag of Words} y TF-IDF, y una exploraci\'{o}n visual con PCA. La Parte~2 cubre el entrenamiento, la validaci\'{o}n y la comparaci\'{o}n de modelos de clasificaci\'{o}n.
 
@@ -199,7 +199,7 @@ Un \textbf{n-grama} es una secuencia contigua de $n$ tokens (palabras o caracter
 
 \subsubsection*{La transformaci\'{o}n TF-IDF}
 
-El principal problema de BoW es que las palabras muy frecuentes en todo el corpus (art\'{\i}culos, preposiciones, conjunciones) dominan los vectores aunque no aporten informaci\'{o}n discriminante entre medios. TF-IDF (\textit{Term Frequency --- Inverse Document Frequency}) corrige esto ponderando cada conteo por la siguiente expresi\'{o}n:
+El principal problema de BoW es que las palabras muy frecuentes en todo el corpus (art\'{\i}culos, preposiciones, conjunciones) dominan los vectores aunque no aporten informaci\'{o}n discriminante entre medios. TF-IDF (\textit{Term Frequency - Inverse Document Frequency}) corrige esto ponderando cada conteo por la siguiente expresi\'{o}n:
 
 \[
 \text{TF-IDF}(t, d) = \text{TF}(t, d) \times \text{IDF}(t)
@@ -287,7 +287,7 @@ Con IDF desactivado, los vectores contienen la frecuencia relativa del t\'{e}rmi
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{imagenes/chart_pca_config_bigrams.png}
-\caption{PCA con \texttt{ngram\_range=(1,2)} y \texttt{max\_features=50.000}. El vocabulario de bigramas es demasiado grande para densificarse sin l\'{\i}mite, por lo que se acota a los 50.000 t\'{e}rminos m\'{a}s frecuentes.}
+\caption{PCA con \texttt{ngram\_range=(1,2)} y \texttt{max\_features=40.000}. El vocabulario de bigramas es demasiado grande para densificarse sin l\'{\i}mite, por lo que se acota a los 50.000 t\'{e}rminos m\'{a}s frecuentes.}
 \label{fig:pca_bigrams}
 \end{figure}
 
@@ -298,7 +298,7 @@ Con IDF desactivado, los vectores contienen la frecuencia relativa del t\'{e}rmi
 \label{fig:biplot_bigrams}
 \end{figure}
 
-Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=50.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) revela expresiones compuestas caracter\'{\i}sticas: bigramas como \textit{``reuters reporting''}, \textit{``new york''} o \textit{``wall street''} pasan a ser features expl\'{\i}citas que no exist\'{\i}an con unigramas.
+Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=40.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) revela expresiones compuestas caracter\'{\i}sticas: bigramas como \textit{``reuters reporting''}, \textit{``new york''} o \textit{``wall street''} pasan a ser features expl\'{\i}citas que no exist\'{\i}an con unigramas.
 
 \subsubsection*{Varianza explicada}
 
