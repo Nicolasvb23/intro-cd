@@ -313,16 +313,31 @@ La Figura~\ref{fig:pca_variance} muestra que la varianza explicada decrece r\'{a
 
 \subsubsection*{Origen de la separaci\'{o}n observada}
 
-La separaci\'{o}n en el PCA puede deberse a tres fuentes distintas, que no son mutuamente excluyentes:
-
-\begin{itemize}
-    \item \textbf{Pistas expl\'{\i}citas del medio}: como se document\'{o} en la Tarea~1, \textit{Reuters} tiene el dateline \texttt{(Reuters)} en el 92\% de sus art\'{\i}culos, y \textit{The Hill} ten\'{\i}a el footer \texttt{Capitol Hill Publishing Corp.} en el 99\%. Aunque en esta tarea \textit{The Hill} ya no est\'{a} presente en el top~3, \textit{Reuters} sigue teniendo estas marcas, lo que crea un eje claro de separaci\'{o}n en las primeras componentes. Con la configuraci\'{o}n base (sin remoci\'{o}n de boilerplate), la separaci\'{o}n de \textit{Reuters} est\'{a} en gran medida impulsada por estos patrones.
-
-    \item \textbf{Diferencias tem\'{a}ticas}: los tres medios cubren agendas distintas. \textit{Reuters} es una agencia de noticias generalista con fuerte cobertura financiera y de mercados; \textit{CNBC} se especializa en econom\'{\i}a y negocios; \textit{NYT} tiene una cobertura amplia que incluye pol\'{\i}tica, cultura y opini\'{o}n. Estas diferencias de cobertura generan vocabularios caracter\'{\i}sticos que contribuyen a la separaci\'{o}n incluso despu\'{e}s de remover las pistas directas.
-
-    \item \textbf{Diferencias de estilo editorial}: independientemente del tema, cada medio tiene convenciones propias de escritura (largo de las notas, uso de citas, estructura de los p\'{a}rrafos, vocabulario t\'{e}cnico). Estas diferencias son m\'{a}s sutiles y podr\'{\i}an quedar capturadas en componentes de orden superior, no necesariamente en las primeras dos.
-\end{itemize}
-
-En la configuraci\'{o}n base, la primera componente est\'{a} muy probablemente dominada por las pistas expl\'{\i}citas de \textit{Reuters}. El filtrado de \textit{stop words} no elimina esas pistas; s\'{\i} lo har\'{\i}a remover el boilerplate mediante regex (como se hizo en la Parte~2 de la Tarea~1), pero ese procesamiento no es parte del an\'{a}lisis de esta secci\'{o}n.
+% TODO: Analizar con base en los biplots reales.
+% Puntos a cubrir:
+%
+% 1. Configuración base (chart_biplot_base.png):
+%    - ¿Qué palabras dominan PC1? ¿Apuntan todas hacia Reuters?
+%    - ¿Qué palabras dominan PC2? ¿Separan NYT de CNBC?
+%    - ¿Se observa boilerplate de Reuters ("reuters", "said") entre las flechas más largas?
+%
+% 2. Con stop_words (chart_biplot_stopwords.png):
+%    - ¿Cambian las flechas dominantes respecto a la base?
+%    - ¿Aparecen términos de contenido temático en vez de palabras funcionales?
+%    - ¿Mejora o empeora la separación visual entre las nubes?
+%
+% 3. Sin IDF (chart_biplot_noidf.png):
+%    - ¿Las flechas más largas corresponden a stopwords ("the", "of", "in")?
+%    - ¿Las nubes de los tres medios se comprimen o superponen más?
+%    - Usar esto para explicar concretamente por qué IDF importa.
+%
+% 4. Bigramas (chart_biplot_bigrams.png):
+%    - ¿Aparecen bigramas identificatorios ("reuters reporting", "new york", "wall street")?
+%    - ¿La separación mejora respecto a la base o se mantiene similar?
+%
+% 5. Conclusión general:
+%    - ¿La separación de Reuters se debe principalmente a boilerplate o también a contenido?
+%    - ¿NYT y CNBC se separan por tema, por estilo, o ambos?
+%    - ¿Con 2 componentes alcanza para separar bien los tres medios?
 
 \end{document}
