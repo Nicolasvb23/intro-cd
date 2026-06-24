@@ -414,4 +414,46 @@ La Figura~\ref{fig:gridsearch_mnb} muestra una ca\'{\i}da mon\'{o}tona del F1-ma
 
 Se opt\'{o} por un gr\'{a}fico de l\'{\i}nea con banda de error en lugar del gr\'{a}fico de viol\'{\i}n sugerido en el enunciado porque la varianza entre folds es muy baja (desviaci\'{o}n est\'{a}ndar $\approx 0{,}006$) frente al rango total de variaci\'{o}n entre valores de $\alpha$ ($\approx 0{,}50$). Con solo 5 puntos por violín, la estimaci\'{o}n de densidad produce formas planas e ilegibles; el gr\'{a}fico de l\'{\i}nea transmite la misma informaci\'{o}n de forma m\'{a}s clara.
 
+\subsection{Entrenamiento final con el mejor modelo}
+
+El modelo seleccionado es MNB con $\alpha=0{,}01$, reentrenado sobre la totalidad del conjunto de entrenamiento (sin reservar folds de validaci\'{o}n). La Tabla~\ref{tab:metrics_mnb_best} y la Figura~\ref{fig:confusion_mnb_best} muestran los resultados finales sobre el test.
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas finales del modelo MNB ($\alpha=0{,}01$) sobre el conjunto de test.}
+\label{tab:metrics_mnb_best}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,88 & 0,88 & 0,88 & 2.780 \\
+The New York Times & 0,73 & 0,88 & 0,80 &   842 \\
+CNBC               & 0,66 & 0,53 & 0,59 &   773 \\
+\midrule
+Macro avg          & 0,76 & 0,76 & 0,76 & 4.395 \\
+Weighted avg       & 0,81 & 0,82 & 0,81 & 4.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/chart_confusion_mnb_best.png}
+\caption{Matriz de confusi\'{o}n del modelo MNB final ($\alpha=0{,}01$) sobre el conjunto de test.}
+\label{fig:confusion_mnb_best}
+\end{figure}
+
+El \textit{accuracy} sube de 70,6\% a \textbf{81,6\%} respecto al MNB con par\'{a}metros por defecto, y el F1-macro pasa de 0,46 a \textbf{0,76}. El modelo ya no colapsa todo a \textit{Reuters}: el recall de las tres clases es ahora m\'{a}s equilibrado (0,88 / 0,88 / 0,53). \textit{CNBC} sigue siendo la clase m\'{a}s dif\'{\i}cil de identificar (F1=0,59), lo que es consistente con que es la clase m\'{a}s peque\~{n}a y comparte vocabulario financiero con \textit{Reuters}.
+
+\subsubsection*{Limitaciones de BoW y TF-IDF}
+
+Las representaciones basadas en BoW y TF-IDF tienen limitaciones estructurales que ninguna optimizaci\'{o}n de hiperpar\'{a}metros puede resolver completamente:
+
+\begin{itemize}
+    \item \textbf{Ignoran el orden y el contexto}: la misma bolsa de palabras resulta de frases con significados opuestos. TF-IDF no distingue entre ``el mercado subi\'{o}'' y ``el mercado baj\'{o}''.
+    \item \textbf{Sin sem\'{a}ntica}: t\'{e}rminos sin\'{o}nimos (\textit{empresa}, \textit{compa\~{n}\'{\i}a}, \textit{firma}) son features independientes aunque refieran al mismo concepto.
+    \item \textbf{Alta dimensionalidad dispersa}: el vocabulario de 84.358 t\'{e}rminos genera vectores muy dispersos donde la mayor\'{\i}a de las entradas son cero, lo que dificulta la generalizaci\'{o}n.
+    \item \textbf{Sensibles al vocabulario del train}: t\'{e}rminos nuevos en el test (palabras no vistas durante el entrenamiento) se ignoran completamente.
+\end{itemize}
+
 \end{document}
