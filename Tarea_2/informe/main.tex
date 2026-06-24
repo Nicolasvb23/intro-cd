@@ -173,9 +173,39 @@ La Figura~\ref{fig:balance} confirma que las proporciones son id\'{e}nticas en t
 
 La representaci\'{o}n \textit{Bag of Words} (BoW) convierte cada documento en un vector num\'{e}rico de la siguiente manera: se construye un \textbf{vocabulario} fijo con todas las palabras distintas que aparecen en el corpus de entrenamiento, y cada documento se representa como un vector de tama\~{n}o igual al vocabulario donde la posici\'{o}n $j$ contiene la \textbf{cantidad de veces} que la palabra $j$ aparece en ese documento. El orden de las palabras dentro del texto se ignora completamente.
 
+Por ejemplo, dado el siguiente corpus de tres frases:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Doc} & \textbf{Texto} \\
+\midrule
+$d_1$ & \textit{``market falls on trade fears''} \\
+$d_2$ & \textit{``trump trade war fears''} \\
+$d_3$ & \textit{``market reacts to trump''} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+El vocabulario resultante es \{falls, fears, market, on, reacts, to, trade, trump, war\} y la matriz BoW es:
+
+\begin{center}
+\begin{tabular}{l ccccccccc}
+\toprule
+ & falls & fears & market & on & reacts & to & trade & trump & war \\
+\midrule
+$d_1$ & 1 & 1 & 1 & 1 & 0 & 0 & 1 & 0 & 0 \\
+$d_2$ & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 1 & 1 \\
+$d_3$ & 0 & 0 & 1 & 0 & 1 & 1 & 0 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cada fila es el vector num\'{e}rico que representa al documento. Notar que \textit{``market falls''} y \textit{``falls market''} producir\'{\i}an exactamente el mismo vector: el orden se pierde.
+
 \subsubsection*{Tama\~{n}o de la matriz}
 
-Se ajust\'{o} un \texttt{CountVectorizer} con par\'{a}metros por defecto sobre el conjunto de entrenamiento. La matriz resultante tiene dimensiones $[\text{n\_docs} \times \text{n\_palabras}]$, donde:
+La matriz BoW ajustada sobre el conjunto de entrenamiento tiene dimensiones $[\text{n\_docs} \times \text{n\_palabras}]$, donde:
 \begin{itemize}
     \item \textbf{Filas}: 10.254 art\'{\i}culos en el conjunto de entrenamiento.
     \item \textbf{Columnas}: 84.358 palabras distintas en el vocabulario aprendido sobre el train.
@@ -187,7 +217,13 @@ Si se almacenara como una matriz densa (todos los valores en memoria), la matriz
 \[
 10.254 \times 84.358 \times 8\ \text{bytes} \approx 6.920\ \text{MB}
 \]
-Esto ser\'{\i}a inmanejable incluso con este dataset reducido. Sin embargo, la gran mayor\'{\i}a de las entradas son cero: la densidad de la matriz es del 0,247\%, lo que significa que m\'{a}s del 99\% de sus valores son cero. Ninguna nota usa m\'{a}s de unos cientos de palabras distintas, mientras que el vocabulario total tiene decenas de miles. Las matrices \textit{sparse} almacenan \'{u}nicamente los valores no-nulos y sus posiciones (formato CSR), reduciendo el uso de memoria de 6.920~MB a tan solo 25,7~MB.
+donde los 8 bytes por elemento corresponden al tipo \texttt{float64} que NumPy usa por defecto. Esto ser\'{\i}a inmanejable incluso con este dataset reducido. Sin embargo, la gran mayor\'{\i}a de las entradas son cero: la densidad de la matriz es del 0,247\%, lo que significa que m\'{a}s del 99\% de sus valores son cero. Ninguna nota usa m\'{a}s de unos cientos de palabras distintas, mientras que el vocabulario total tiene decenas de miles.
+
+Las matrices \textit{sparse} en formato CSR almacenan \'{u}nicamente los valores no-nulos y sus posiciones mediante tres arrays: los valores (\texttt{float64}, 8 bytes cada uno), los \'{\i}ndices de columna (\texttt{int32}, 4 bytes cada uno) y los punteros de fila (\texttt{int32}, despreciable). Con $\approx$2,14 millones de entradas no-nulas (densidad $\times$ tama\~{n}o total), el costo es:
+\[
+2{.}136{.}567 \times (8 + 4)\ \text{bytes} \approx 25{,}7\ \text{MB}
+\]
+una reducci\'{o}n de 6.920~MB a tan solo 25,7~MB.
 
 Si en lugar de 14.000 art\'{\i}culos tuvi\'{e}ramos el dataset completo de 1,8 millones de art\'{\i}culos del corpus original y un vocabulario de cientos de miles de palabras, la matriz densa ser\'{\i}a completamente inviable en cualquier equipo de c\'{o}mputo est\'{a}ndar.
 
@@ -211,14 +247,14 @@ donde $\text{TF}(t, d)$ es la frecuencia normalizada del t\'{e}rmino $t$ en el d
     \item \textbf{Premia t\'{e}rminos discriminantes}: una palabra rara que aparece mucho en un documento particular y poco en el resto recibe un peso alto.
 \end{itemize}
 
-El vectorizador \texttt{TfidfVectorizer} se ajusta \'{u}nicamente sobre el conjunto de entrenamiento (\texttt{fit\_transform}). El vocabulario y los valores IDF aprendidos se aplican luego sobre el conjunto de test (\texttt{transform}), sin recalcular nada sobre el test. Esto simula correctamente el escenario real donde el modelo no tiene acceso a los datos de evaluaci\'{o}n al momento de entrenarse.
+El vectorizador se ajusta \'{u}nicamente sobre el conjunto de entrenamiento. El vocabulario y los valores IDF aprendidos se aplican luego sobre el conjunto de test, sin recalcular nada sobre \'{e}l. Esto simula correctamente el escenario real donde el modelo no tiene acceso a los datos de evaluaci\'{o}n al momento de entrenarse.
 
 \subsection{Visualizaci\'{o}n PCA sobre TF-IDF}
 \label{sec:pca}
 
 \subsubsection*{Consideraciones de implementaci\'{o}n}
 
-El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz TF-IDF como densa para poder centrarla. Con el vocabulario completo de 84.358 palabras y 10.254 documentos de entrenamiento, esto supone aproximadamente 6,9~GB en RAM. En esta tarea se opt\'{o} por utilizar directamente \texttt{sklearn.decomposition.PCA}, materializando la matriz completa con \texttt{.toarray()}. Como alternativa sin restricciones de memoria, \texttt{TruncatedSVD} opera sobre la representaci\'{o}n \textit{sparse} sin densificarla, aunque sin centrar los datos previamente.
+El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar la matriz TF-IDF como densa para poder centrarla. Con el vocabulario completo de 84.358 palabras y 10.254 documentos de entrenamiento, esto supone aproximadamente 6,9~GB en RAM, lo que es viable dado el equipo disponible. PCA es el m\'{e}todo solicitado en el enunciado de la tarea para esta visualizaci\'{o}n.
 
 \subsubsection*{Resultados con la configuraci\'{o}n base}
 
@@ -229,13 +265,19 @@ El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar 
 \label{fig:biplot_base}
 \end{figure}
 
-La Figura~\ref{fig:biplot_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. Se observa que \textit{Reuters} forma una nube claramente separada del resto, especialmente a lo largo de la primera componente. \textit{NYT} y \textit{CNBC} presentan mayor superposici\'{o}n entre s\'{\i}, aunque con cierta separaci\'{o}n. Las dos primeras componentes explican solo el 4,1\% de la varianza total, lo que indica que \textbf{no es posible separar los tres medios de forma perfecta con \'{u}nicamente 2 componentes}: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n. Las flechas superponen los vectores de \textit{loading} de las 15 palabras con mayor magnitud; su longitud indica cu\'{a}nto contribuye esa palabra y su direcci\'{o}n hacia qu\'{e} lado del plano ``apunta'' esa palabra.
+\subsubsection*{C\'{o}mo leer un biplot}
 
-La Figura~\ref{fig:biplot_base} muestra que las flechas de mayor loading apuntan mayoritariamente hacia el lado \textbf{positivo} de PC1, que es donde se concentran \textit{NYT} y \textit{CNBC}. \textit{Reuters} queda en el extremo \textbf{negativo} de PC1, separado del resto. Esto indica que los t\'{e}rminos con mayor peso en la primera componente son palabras m\'{a}s presentes en \textit{NYT} y \textit{CNBC}; los art\'{\i}culos de \textit{Reuters} se caracterizan por tener valores bajos para esas dimensiones. Los labels se superponen y son dif\'{\i}ciles de leer individualmente, lo cual es consistente con que varios t\'{e}rminos contribuyen de forma similar a PC1 sin que uno solo domine claramente.
+En un biplot, cada flecha representa un t\'{e}rmino del vocabulario. Su \textbf{longitud} es proporcional a la magnitud del loading en el plano mostrado: una flecha larga indica que ese t\'{e}rmino contribuye significativamente a las componentes graficadas. Su \textbf{direcci\'{o}n} indica hacia qu\'{e} zona del espacio ``apunta'' ese t\'{e}rmino: los documentos ubicados en esa direcci\'{o}n tienden a tener valores altos para ese feature. El \textbf{\'{a}ngulo entre dos flechas} aproxima la correlaci\'{o}n entre ambos t\'{e}rminos: flechas paralelas indican covarianza positiva, flechas opuestas indican covarianza negativa, y flechas perpendiculares indican t\'{e}rminos pr\'{a}cticamente no correlacionados.
+
+Sin embargo, toda interpretaci\'{o}n de un biplot es v\'{a}lida \textbf{solo dentro del subespacio proyectado}. Si las primeras dos componentes explican una fracci\'{o}n peque\~{n}a de la varianza total, los \'{a}ngulos y direcciones visibles pueden diferir considerablemente de las relaciones reales en el espacio completo. En este caso, PC1 y PC2 explican apenas el 4,1\% de la varianza: las observaciones deben tomarse como indicios cualitativos de las direcciones m\'{a}s prominentes, no como afirmaciones precisas sobre la estructura global de los datos.
+
+La Figura~\ref{fig:biplot_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. \textit{Reuters} forma una nube claramente separada del resto en el extremo \textbf{negativo} de PC1, mientras que \textit{NYT} y \textit{CNBC} se concentran en el lado \textbf{positivo} con mayor superposici\'{o}n entre s\'{\i}. Las dos primeras componentes explican solo el 4,1\% de la varianza total: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n.
+
+El t\'{e}rmino con flecha m\'{a}s larga es \textit{``the''}, paralela a PC1 apuntando hacia \textit{NYT}/\textit{CNBC}: los art\'{\i}culos de esos medios tienen mayor frecuencia relativa de \textit{``the''} que el estilo telegr\'{a}fico de \textit{Reuters}. \textit{``percent''} apunta hacia arriba (PC2 positivo), hacia la zona de \textit{NYT} y \textit{CNBC}, reflejando cobertura de noticias num\'{e}ricas. \textit{``million''} apunta en direcci\'{o}n opuesta (arriba-izquierda, hacia \textit{Reuters}), consistente con el estilo del wire financiero. \textit{``text''} apunta directamente hacia \textit{Reuters}, posiblemente como artefacto de boilerplate del medio. El resto de los t\'{e}rminos visibles (\textit{``in''}, \textit{``to''}, \textit{``of''}, \textit{``and''}, \textit{``that''}) son \textit{stop words} con flechas muy cortas y sin direcci\'{o}n clara: IDF los penaliza fuertemente pero no los elimina por completo gracias al suavizado aditivo de la f\'{o}rmula.
 
 \subsubsection*{Comparaci\'{o}n de configuraciones}
 
-Se analiza el efecto de tres modificaciones al \texttt{TfidfVectorizer}. Para cada configuraci\'{o}n se muestra el biplot correspondiente.
+Se analiza el efecto de tres modificaciones al vectorizador TF-IDF. Para cada configuraci\'{o}n se muestra el biplot correspondiente.
 
 \paragraph{a) Filtrado de \textit{stop words} (\texttt{stop\_words='english'}).}
 
@@ -246,7 +288,11 @@ Se analiza el efecto de tres modificaciones al \texttt{TfidfVectorizer}. Para ca
 \label{fig:biplot_stopwords}
 \end{figure}
 
-Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), palabras como \textit{``the''}, \textit{``of''} o \textit{``in''} desaparecen del vocabulario y quedan expuestos t\'{e}rminos de contenido. La Figura~\ref{fig:biplot_stopwords} revela una separaci\'{o}n tem\'{a}tica entre dos grupos de flechas: por un lado \textit{``trump''} y \textit{``market''}, asociados a cobertura pol\'{\i}tica y de mercados financieros estadounidenses (\textit{NYT} y \textit{CNBC}); por el otro \textit{``share''}, \textit{``yuan''}, \textit{``million''} y \textit{``company''}, t\'{e}rminos propios del wire financiero internacional de \textit{Reuters}. Esta separaci\'{o}n editorial no era visible en la configuraci\'{o}n base porque las palabras funcionales dominaban los loadings. Contra lo intuitivo, PC1 cae de 3,2\% a 1,1\%: al eliminar los t\'{e}rminos m\'{a}s frecuentes se reduce la concentraci\'{o}n de varianza en la primera direcci\'{o}n, distribuy\'{e}ndola entre m\'{a}s componentes.
+Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposiciones, conjunciones), palabras como \textit{``the''}, \textit{``of''} o \textit{``in''} desaparecen del vocabulario y quedan expuestos t\'{e}rminos de contenido. La Figura~\ref{fig:biplot_stopwords} revela una separaci\'{o}n tem\'{a}tica clara entre dos grupos de flechas con direcciones opuestas.
+
+Hacia el lado de \textit{Reuters} aparecen \textit{``share''}, \textit{``yuan''}, \textit{``million''} y \textit{``company''}: vocabulario t\'{\i}pico del wire financiero internacional, que cubre cotizaciones burs\'{a}tiles, divisas asi\'{a}ticas y resultados corporativos. Hacia \textit{NYT} y \textit{CNBC} apunta \textit{``trump''}, reflejo de la cobertura pol\'{\i}tica estadounidense que domina esos medios. Que estas flechas sean aproximadamente opuestas entre s\'{\i} indica correlaci\'{o}n negativa en el plano proyectado: los art\'{\i}culos que usan mucho \textit{``yuan''} o \textit{``share''} tienden a no usar \textit{``trump''}, y viceversa.
+
+Esta separaci\'{o}n editorial no era visible en la configuraci\'{o}n base porque las palabras funcionales dominaban los loadings. Contra lo intuitivo, PC1 cae de 3,2\% a 1,1\%: al eliminar los t\'{e}rminos m\'{a}s frecuentes se reduce la concentraci\'{o}n de varianza en la primera direcci\'{o}n, distribuy\'{e}ndola entre m\'{a}s componentes.
 
 \paragraph{b) Sin IDF (\texttt{use\_idf=False}).}
 
@@ -268,7 +314,9 @@ Con IDF desactivado, las palabras muy comunes recuperan el peso que el factor in
 \label{fig:biplot_bigrams}
 \end{figure}
 
-Al agregar bigramas el vocabulario incluye todas las secuencias de dos palabras consecutivas, lo que lo hace crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=60.000}. El biplot (Figura~\ref{fig:biplot_bigrams}) conserva una estructura similar a la configuraci\'{o}n base: \textit{Reuters} aparece en el extremo negativo de PC1 y \textit{``reuters''} figura entre los t\'{e}rminos de mayor loading. La varianza explicada por PC1 (3,0\%) es pr\'{a}cticamente igual a la base (3,2\%), lo que indica que la adici\'{o}n de bigramas no altera cualitativamente la separaci\'{o}n en las primeras dos dimensiones.
+Al agregar bigramas el vocabulario sin l\'{\i}mite incluir\'{\i}a unigramas m\'{a}s todas las combinaciones de dos palabras consecutivas, lo que lo har\'{\i}a crecer hasta cientos de miles de t\'{e}rminos. Para hacer viable la densificaci\'{o}n se acot\'{o} a \texttt{max\_features=60.000}, que es incluso menor que el vocabulario base de 84.358 unigramas: el l\'{\i}mite selecciona los 60.000 t\'{e}rminos m\'{a}s frecuentes, que en su mayor\'{\i}a siguen siendo unigramas.
+
+Esto se refleja en el biplot (Figura~\ref{fig:biplot_bigrams}): las flechas no muestran una direcci\'{o}n clara ni una separaci\'{o}n definida entre medios, y los t\'{e}rminos de mayor loading son en su mayor\'{\i}a unigramas, no bigramas. La varianza explicada por PC1 (3,0\%) es pr\'{a}cticamente igual a la base (3,2\%), lo que confirma que agregar bigramas con este l\'{\i}mite no aporta informaci\'{o}n discriminante adicional en las primeras dos componentes.
 
 \subsubsection*{Varianza explicada}
 
@@ -283,31 +331,12 @@ La Figura~\ref{fig:pca_variance} muestra que la varianza explicada decrece r\'{a
 
 \subsubsection*{Origen de la separaci\'{o}n observada}
 
-% TODO: Analizar con base en los biplots reales.
-% Puntos a cubrir:
-%
-% 1. Configuración base (chart_biplot_base.png):
-%    - ¿Qué palabras dominan PC1? ¿Apuntan todas hacia Reuters?
-%    - ¿Qué palabras dominan PC2? ¿Separan NYT de CNBC?
-%    - ¿Se observa boilerplate de Reuters ("reuters", "said") entre las flechas más largas?
-%
-% 2. Con stop_words (chart_biplot_stopwords.png):
-%    - ¿Cambian las flechas dominantes respecto a la base?
-%    - ¿Aparecen términos de contenido temático en vez de palabras funcionales?
-%    - ¿Mejora o empeora la separación visual entre las nubes?
-%
-% 3. Sin IDF (chart_biplot_noidf.png):
-%    - ¿Las flechas más largas corresponden a stopwords ("the", "of", "in")?
-%    - ¿Las nubes de los tres medios se comprimen o superponen más?
-%    - Usar esto para explicar concretamente por qué IDF importa.
-%
-% 4. Bigramas (chart_biplot_bigrams.png):
-%    - ¿Aparecen bigramas identificatorios ("reuters reporting", "new york", "wall street")?
-%    - ¿La separación mejora respecto a la base o se mantiene similar?
-%
-% 5. Conclusión general:
-%    - ¿La separación de Reuters se debe principalmente a boilerplate o también a contenido?
-%    - ¿NYT y CNBC se separan por tema, por estilo, o ambos?
-%    - ¿Con 2 componentes alcanza para separar bien los tres medios?
+El an\'{a}lisis de los biplots permite identificar dos fuentes de separaci\'{o}n entre los medios: diferencias de \textbf{estilo editorial} y diferencias de \textbf{contenido tem\'{a}tico}.
+
+\textit{Reuters} se separa del resto a lo largo de PC1 por ambas razones a la vez. Por un lado, \textit{``the''} es el t\'{e}rmino de mayor loading en el biplot base, apuntando hacia \textit{NYT}/\textit{CNBC}, lo que indica que los art\'{\i}culos de esos medios tienen mayor frecuencia relativa de ese t\'{e}rmino que los de \textit{Reuters}. Por otro lado, su cobertura tem\'{a}tica de wire financiero internacional genera vocabulario espec\'{\i}fico (\textit{``yuan''}, \textit{``share''}, \textit{``million''}, \textit{``company''}) que apunta hacia el lado de \textit{Reuters} en el biplot sin stop words. El t\'{e}rmino \textit{``text''} apuntando tambi\'{e}n hacia \textit{Reuters} sugiere adem\'{a}s la presencia de alg\'{u}n boilerplate propio del medio que sobrevivi\'{o} a la limpieza.
+
+\textit{NYT} y \textit{CNBC} no se separan bien entre s\'{\i} con solo 2 componentes. Ambos quedan del mismo lado de PC1 por compartir cobertura pol\'{\i}tico-econ\'{o}mica estadounidense: \textit{``trump''} apunta hacia ambos, y \textit{``market''} tambi\'{e}n. La diferencia entre estos dos medios requiere componentes m\'{a}s all\'{a} de las dos primeras, que en conjunto explican apenas el 4,1\% de la varianza.
+
+En definitiva, con 2 componentes PCA \textbf{no es posible separar los tres medios de forma limpia}. \textit{Reuters} s\'{\i} queda claramente diferenciado, pero \textit{NYT} y \textit{CNBC} se superponen en el plano proyectado. La separaci\'{o}n observada es una combinaci\'{o}n de estilo (frecuencia de palabras funcionales, longitud de art\'{\i}culos) y contenido tem\'{a}tico (finanzas internacionales vs.\ pol\'{\i}tica estadounidense), sin que sea posible atribuirla a una sola causa.
 
 \end{document}
