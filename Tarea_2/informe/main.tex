@@ -339,4 +339,58 @@ El an\'{a}lisis de los biplots permite identificar dos fuentes de separaci\'{o}n
 
 En definitiva, con 2 componentes PCA \textbf{no es posible separar los tres medios de forma limpia}. \textit{Reuters} s\'{\i} queda claramente diferenciado, pero \textit{NYT} y \textit{CNBC} se superponen en el plano proyectado. La separaci\'{o}n observada es una combinaci\'{o}n de estilo (frecuencia de palabras funcionales, longitud de art\'{\i}culos) y contenido tem\'{a}tico (finanzas internacionales vs.\ pol\'{\i}tica estadounidense), sin que sea posible atribuirla a una sola causa.
 
+% ══════════════════════════════════════════════════════════════════════
+% PARTE 2
+% ══════════════════════════════════════════════════════════════════════
+\section{Parte 2: Entrenamiento y evaluaci\'{o}n de modelos}
+
+\subsection{Multinomial Naive Bayes}
+
+\subsubsection*{C\'{o}mo funciona}
+
+El clasificador \textit{Multinomial Naive Bayes} (MNB) estima la probabilidad de que un documento $d$ pertenezca a una clase $c$ mediante el teorema de Bayes:
+\[
+P(c \mid d) \propto P(c) \prod_{t \in d} P(t \mid c)^{f_{t,d}}
+\]
+donde $P(c)$ es la probabilidad a priori de la clase (proporcional a su frecuencia en el training), $P(t \mid c)$ es la probabilidad del t\'{e}rmino $t$ en los documentos de clase $c$, y $f_{t,d}$ es la frecuencia del t\'{e}rmino en el documento. La suposici\'{o}n ``naive'' es que los t\'{e}rminos son condicionalmente independientes dada la clase, lo que raramente se cumple en la pr\'{a}ctica pero simplifica el c\'{a}lculo y funciona sorprendentemente bien en texto. El par\'{a}metro $\alpha$ controla el suavizado de Laplace, que evita probabilidades nulas para t\'{e}rminos no vistos en el training.
+
+\subsubsection*{Resultados}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/chart_confusion_mnb.png}
+\caption{Matriz de confusi\'{o}n del clasificador Multinomial Naive Bayes sobre el conjunto de test.}
+\label{fig:confusion_mnb}
+\end{figure}
+
+El modelo alcanza un \textit{accuracy} del \textbf{70,6\%} sobre el conjunto de test. La Tabla~\ref{tab:metrics_mnb} desglosa las m\'{e}tricas por medio.
+
+\begin{table}[H]
+\centering
+\caption{Precision, recall y F1-score del clasificador MNB por medio de prensa.}
+\label{tab:metrics_mnb}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,69 & 1,00 & 0,81 & 2.780 \\
+The New York Times & 0,95 & 0,38 & 0,54 &   842 \\
+CNBC               & 1,00 & 0,01 & 0,02 &   773 \\
+\midrule
+Macro avg          & 0,88 & 0,46 & 0,46 & 4.395 \\
+Weighted avg       & 0,79 & 0,71 & 0,62 & 4.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{An\'{a}lisis}
+
+Los resultados revelan un problema cl\'{a}sico de datos desbalanceados. El modelo clasifica pr\'{a}cticamente todo como \textit{Reuters} (recall=1,00), que es la clase mayoritaria con el 63,3\% de los datos. Al usar las frecuencias de clase como probabilidades a priori, MNB aprende que apostar a \textit{Reuters} es rentable: ese sesgo le garantiza acertar todos los art\'{\i}culos de esa fuente. Como consecuencia, \textit{CNBC} queda casi invisible para el modelo (recall=0,01), e \textit{NYT} se identifica correctamente solo en el 38\% de los casos.
+
+La relaci\'{o}n con la matriz de confusi\'{o}n (Figura~\ref{fig:confusion_mnb}) es directa: la columna de \textit{Reuters} concentra la mayor\'{\i}a de las predicciones, y las filas de \textit{NYT} y \textit{CNBC} muestran que la mayor parte de esos art\'{\i}culos es enviada err\'{o}neamente a \textit{Reuters}.
+
+\subsubsection*{Limitaciones del \textit{accuracy}}
+
+El \textit{accuracy} del 70,6\% es enga\~{n}oso: un clasificador trivial que siempre prediga \textit{Reuters} alcanzar\'{\i}a el 63,3\% sin aprender nada del contenido. El modelo MNB base solo mejora 7 puntos sobre esa l\'{\i}nea de base. Si el desbalance fuera a\'{u}n mayor (por ejemplo, 95\% de una clase), el \textit{accuracy} podr\'{\i}a superar el 95\% con un clasificador que ignora completamente las clases minoritarias. Por eso es fundamental complementar el \textit{accuracy} con m\'{e}tricas por clase como \textit{precision}, \textit{recall} y F1, que exponen el comportamiento del modelo en cada clase individualmente.
+
 \end{document}
