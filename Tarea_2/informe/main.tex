@@ -393,4 +393,25 @@ La relaci\'{o}n con la matriz de confusi\'{o}n (Figura~\ref{fig:confusion_mnb}) 
 
 El \textit{accuracy} del 70,6\% es enga\~{n}oso: un clasificador trivial que siempre prediga \textit{Reuters} alcanzar\'{\i}a el 63,3\% sin aprender nada del contenido. El modelo MNB base solo mejora 7 puntos sobre esa l\'{\i}nea de base. Si el desbalance fuera a\'{u}n mayor (por ejemplo, 95\% de una clase), el \textit{accuracy} podr\'{\i}a superar el 95\% con un clasificador que ignora completamente las clases minoritarias. Por eso es fundamental complementar el \textit{accuracy} con m\'{e}tricas por clase como \textit{precision}, \textit{recall} y F1, que exponen el comportamiento del modelo en cada clase individualmente.
 
+\subsection{Validaci\'{o}n cruzada y b\'{u}squeda de hiperpar\'{a}metros}
+
+\subsubsection*{Validaci\'{o}n cruzada}
+
+La validaci\'{o}n cruzada de $k$ folds divide el conjunto de entrenamiento en $k$ partes iguales. En cada iteraci\'{o}n, $k-1$ partes se usan para entrenar y la parte restante para evaluar; esto se repite $k$ veces rotando la parte de evaluaci\'{o}n. El resultado final es el promedio de las $k$ m\'{e}tricas obtenidas. La ventaja frente a una sola partici\'{o}n train/validaci\'{o}n es que todos los datos participan tanto en entrenamiento como en evaluaci\'{o}n, obteniendo una estimaci\'{o}n m\'{a}s robusta y con menor varianza. El conjunto de test nunca se toca durante este proceso.
+
+\subsubsection*{B\'{u}squeda de hiperpar\'{a}metros}
+
+Se realiz\'{o} una b\'{u}squeda exhaustiva (\textit{GridSearchCV}) sobre el par\'{a}metro $\alpha$ del suavizado de Laplace, usando validaci\'{o}n cruzada de 5 folds y F1-macro como m\'{e}trica de selecci\'{o}n. Los valores explorados fueron $\alpha \in \{0{,}01;\, 0{,}05;\, 0{,}1;\, 0{,}5;\, 1{,}0;\, 2{,}0;\, 5{,}0;\, 10{,}0\}$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagenes/chart_gridsearch_mnb.png}
+\caption{F1-macro medio (5 folds) en funci\'{o}n del valor de $\alpha$. La banda sombreada indica $\pm 1$ desviaci\'{o}n est\'{a}ndar entre folds. El punto rojo marca el mejor valor encontrado.}
+\label{fig:gridsearch_mnb}
+\end{figure}
+
+La Figura~\ref{fig:gridsearch_mnb} muestra una ca\'{\i}da mon\'{o}tona del F1-macro a medida que $\alpha$ aumenta: el mejor valor es $\alpha=0{,}01$ con F1-macro$=0{,}754$, mientras que $\alpha=10$ colapsa a $0{,}258$. Un $\alpha$ grande suaviza excesivamente las probabilidades de los t\'{e}rminos, acercando las distribuciones de todas las clases entre s\'{\i} y destruyendo la informaci\'{o}n discriminante. El mejor $\alpha=0{,}01$ indica que con TF-IDF el modelo se beneficia de un suavizado m\'{\i}nimo.
+
+Se opt\'{o} por un gr\'{a}fico de l\'{\i}nea con banda de error en lugar del gr\'{a}fico de viol\'{\i}n sugerido en el enunciado porque la varianza entre folds es muy baja (desviaci\'{o}n est\'{a}ndar $\approx 0{,}006$) frente al rango total de variaci\'{o}n entre valores de $\alpha$ ($\approx 0{,}50$). Con solo 5 puntos por violín, la estimaci\'{o}n de densidad produce formas planas e ilegibles; el gr\'{a}fico de l\'{\i}nea transmite la misma informaci\'{o}n de forma m\'{a}s clara.
+
 \end{document}
