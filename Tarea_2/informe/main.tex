@@ -456,4 +456,104 @@ Las representaciones basadas en BoW y TF-IDF tienen limitaciones estructurales q
     \item \textbf{Sensibles al vocabulario del train}: t\'{e}rminos nuevos en el test (palabras no vistas durante el entrenamiento) se ignoran completamente.
 \end{itemize}
 
+\subsection{Modelo alternativo: Regresi\'{o}n Log\'{\i}stica}
+
+\subsubsection*{C\'{o}mo funciona}
+
+Como segundo modelo se entren\'{o} una \textbf{regresi\'{o}n log\'{\i}stica multinomial} sobre las mismas \textit{features} TF-IDF. A diferencia de MNB, que es un modelo \textit{generativo} y asume independencia condicional entre las palabras dada la clase, la regresi\'{o}n log\'{\i}stica es un modelo \textit{discriminativo}: aprende directamente un vector de pesos por t\'{e}rmino para cada medio y estima $P(\text{medio} \mid \text{texto})$ aplicando la funci\'{o}n \textit{softmax} a una combinaci\'{o}n lineal de los pesos TF-IDF. No asume independencia entre \textit{features}, por lo que puede capturar mejor t\'{e}rminos correlacionados, a costa de un entrenamiento m\'{a}s lento (optimizaci\'{o}n iterativa).
+
+\subsubsection*{Resultados y comparaci\'{o}n}
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas de la regresi\'{o}n log\'{\i}stica sobre el conjunto de test.}
+\label{tab:metrics_logreg}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,87 & 0,97 & 0,92 & 2.780 \\
+The New York Times & 0,90 & 0,87 & 0,88 &   842 \\
+CNBC               & 0,85 & 0,52 & 0,65 &   773 \\
+\midrule
+Macro avg          & 0,87 & 0,79 & 0,82 & 4.395 \\
+Weighted avg       & 0,87 & 0,87 & 0,86 & 4.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/chart_confusion_logreg.png}
+\caption{Matriz de confusi\'{o}n de la regresi\'{o}n log\'{\i}stica sobre el conjunto de test.}
+\label{fig:confusion_logreg}
+\end{figure}
+
+La regresi\'{o}n log\'{\i}stica supera al MNB final en ambas m\'{e}tricas globales: el \textit{accuracy} pasa de \textbf{81,6\% a 87,4\%} y el F1-macro de \textbf{0,76 a 0,82}. La mejora m\'{a}s notoria es en la \textit{precision} de \textit{CNBC} (de 0,66 a 0,85): el modelo discriminativo comete menos falsos positivos sobre la clase minoritaria. Sin embargo, el \textit{recall} de \textit{CNBC} se mantiene bajo (0,52): casi la mitad de sus art\'{\i}culos siguen confundi\'{e}ndose con \textit{Reuters}, lo que confirma que la dificultad no es del modelo sino de la fuerte superposici\'{o}n de vocabulario financiero entre ambos medios. En resumen, ambos modelos chocan con el mismo l\'{\i}mite, pero la regresi\'{o}n log\'{\i}stica lo aprovecha mejor al no asumir independencia entre t\'{e}rminos.
+
+\subsection{Cambio de medio de prensa}
+
+Para estudiar el efecto del conjunto de clases, se reemplaz\'{o} el tercer medio (\textit{CNBC}) por el cuarto con m\'{a}s art\'{\i}culos, \textit{The Hill} (medio de pol\'{\i}tica estadounidense), manteniendo \textit{Reuters} y \textit{The New York Times}. El nuevo conjunto qued\'{o} con la siguiente distribuci\'{o}n:
+
+\begin{table}[H]
+\centering
+\caption{Balance de clases del nuevo conjunto de medios.}
+\label{tab:balance_new}
+\begin{tabular}{l r r}
+\toprule
+\textbf{Medio} & \textbf{Art\'{\i}culos} & \textbf{Proporci\'{o}n} \\
+\midrule
+Reuters            & 9.266 & 64,3\% \\
+The New York Times & 2.805 & 19,5\% \\
+The Hill           & 2.349 & 16,3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El desbalance es comparable (incluso levemente mayor) al del conjunto original: \textit{Reuters} sigue siendo la clase mayoritaria con $\sim$64\%. Reentrenando el mismo modelo (MNB con $\alpha=0{,}01$) se obtienen los resultados de la Tabla~\ref{tab:metrics_new} y la Figura~\ref{fig:confusion_new}.
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas del MNB ($\alpha=0{,}01$) sobre el nuevo conjunto de test.}
+\label{tab:metrics_new}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,96 & 0,93 & 0,94 & 2.780 \\
+The New York Times & 0,81 & 0,86 & 0,83 &   841 \\
+The Hill           & 0,86 & 0,93 & 0,89 &   705 \\
+\midrule
+Macro avg          & 0,88 & 0,90 & 0,89 & 4.326 \\
+Weighted avg       & 0,92 & 0,91 & 0,91 & 4.326 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_confusion_newmedia.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_pca_newmedia.png}
+\end{minipage}
+\caption{Izquierda: matriz de confusi\'{o}n del MNB sobre el nuevo conjunto. Derecha: mapa de 2 componentes (TruncatedSVD) del nuevo conjunto de entrenamiento.}
+\label{fig:confusion_new}
+\end{figure}
+
+El resultado clave es que, \textbf{con un desbalance pr\'{a}cticamente igual}, el \textit{accuracy} sube de 81,6\% a \textbf{91,3\%} y el F1-macro de 0,76 a \textbf{0,89}. Esto muestra que el problema del conjunto original no era principalmente el desbalance, sino la \textbf{separabilidad tem\'{a}tica}: \textit{CNBC} comparte vocabulario econ\'{o}mico-financiero con \textit{Reuters}, mientras que \textit{The Hill}, al cubrir pol\'{\i}tica, usa un vocabulario propio (t\'{e}rminos como \textit{congress}, \textit{senate}, \textit{bill}) que lo hace mucho m\'{a}s f\'{a}cil de distinguir. El mapa de la Figura~\ref{fig:confusion_new} (derecha) anticipa este comportamiento: \textit{Reuters} forma un cl\'{u}ster compacto y \textit{The Hill} se ubica en una regi\'{o}n diferenciada, con menos solapamiento que el que se observaba para \textit{CNBC} en la Parte~1.
+
+\subsubsection*{Desbalance y t\'{e}cnicas de re-muestreo}
+
+El desbalance penaliza siempre a las clases minoritarias: el MNB tiende a favorecer a \textit{Reuters} por su mayor probabilidad a priori, y el \textit{accuracy} global queda dominado por ella. Dos familias de t\'{e}cnicas (no implementadas aqu\'{\i}) ayudan a mitigarlo: el \textbf{sobre-muestreo} de las clases minoritarias (replicar art\'{\i}culos o generar ejemplos sint\'{e}ticos, p.\,ej.\ SMOTE) y el \textbf{sub-muestreo} de la clase mayoritaria (descartar art\'{\i}culos de \textit{Reuters} para igualar los tama\~{n}os). El sobre-muestreo arriesga sobreajuste por repetici\'{o}n, y el sub-muestreo descarta informaci\'{o}n \'{u}til; una alternativa intermedia es ajustar los pesos de clase en el modelo.
+
+\subsection{T\'{e}cnica alternativa de extracci\'{o}n de \textit{features}}
+
+Una alternativa a BoW/TF-IDF son los \textbf{\textit{word embeddings}} (por ejemplo \textit{Word2Vec} o \textit{GloVe}). En lugar de representar cada palabra como una columna independiente en un vector disperso de tama\~{n}o igual al vocabulario, los \textit{embeddings} aprenden, a partir de grandes corpus, un vector \textbf{denso} de baja dimensi\'{o}n (t\'{\i}picamente 100--300) para cada palabra, de forma que palabras que aparecen en contextos similares quedan cercanas en ese espacio. Un documento puede representarse, por ejemplo, promediando los vectores de sus palabras.
+
+La diferencia principal respecto a TF-IDF es que los \textit{embeddings} capturan \textbf{relaciones sem\'{a}nticas}: sin\'{o}nimos como \textit{empresa}, \textit{compa\~{n}\'{\i}a} y \textit{firma} quedan pr\'{o}ximos, algo imposible en BoW donde son \textit{features} totalmente independientes. Esto suele mejorar la generalizaci\'{o}n y reduce drasticamente la dimensionalidad. Como contrapartida, se pierde la interpretabilidad directa de cada \textit{feature} y un simple promedio de vectores sigue ignorando el orden de las palabras (limitaci\'{o}n que s\'{\i} resuelven modelos contextuales m\'{a}s avanzados como \textit{BERT}). En este problema, donde la separaci\'{o}n parece deberse m\'{a}s a vocabulario tem\'{a}tico que a matices sem\'{a}nticos, no necesariamente se obtendr\'{\i}a una gran mejora, pero s\'{\i} cabr\'{\i}a esperar mejor desempe\~{n}o en la clase dif\'{\i}cil (\textit{CNBC}), donde la distinci\'{o}n es m\'{a}s sutil.
+
 \end{document}

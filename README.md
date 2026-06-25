@@ -2,6 +2,18 @@
 
 Este repositorio contiene las letras y notebooks de las tareas propuestas para la edición 2026 del curso de Introducción a la Ciencia de Datos.
 
+## Entregables
+
+### Tarea 1
+- **Informe:** `Tarea_1/informe/main.pdf`
+- **Notebook principal:** `Tarea_1/2026_tarea1.ipynb`
+- **Script auxiliar:** `Tarea_1/build_chart_2a.py` — genera el gráfico `chart_2a`.
+- **Slides:** `Tarea_1/slides/slides_grupo23.pdf`
+
+### Tarea 2
+- **Informe:** `Tarea_2/informe/main.pdf` (fuente en `main.tex`, figuras en `informe/imagenes/`).
+- **Notebook principal:** `Tarea_2/2026_tarea2.ipynb` — incluye toda la implementación: limpieza y partición estratificada de los datos, representaciones Bag of Words y TF-IDF, visualización PCA, y la Parte 2 (Multinomial Naive Bayes, validación cruzada con GridSearchCV, modelo alternativo de regresión logística, cambio de medio de prensa y análisis de técnicas alternativas de extracción de features).
+
 En general, el procedimiento para correr los notebooks es simplemente instalar los requerimientos y levantar el servidor de jupyter:
 ```sh
 cd ruta/a/introCD/Tarea_1/
