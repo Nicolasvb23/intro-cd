@@ -7,3 +7,4 @@ nltk
 scikit-learn
 datasets
 numpy
+xgboost

@@ -3,6 +3,7 @@
 % ── Idioma y codificacion ─────────────────────────────────────────────
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage[spanish]{babel}
 
 % ── Layout y tipografia ──────────────────────────────────────────────
@@ -269,11 +270,11 @@ El an\'{a}lisis de componentes principales (\textit{PCA}) requiere materializar 
 
 En un biplot, cada flecha representa un t\'{e}rmino del vocabulario. Su \textbf{longitud} es proporcional a la magnitud del loading en el plano mostrado: una flecha larga indica que ese t\'{e}rmino contribuye significativamente a las componentes graficadas. Su \textbf{direcci\'{o}n} indica hacia qu\'{e} zona del espacio ``apunta'' ese t\'{e}rmino: los documentos ubicados en esa direcci\'{o}n tienden a tener valores altos para ese feature. El \textbf{\'{a}ngulo entre dos flechas} aproxima la correlaci\'{o}n entre ambos t\'{e}rminos: flechas paralelas indican covarianza positiva, flechas opuestas indican covarianza negativa, y flechas perpendiculares indican t\'{e}rminos pr\'{a}cticamente no correlacionados.
 
-Sin embargo, toda interpretaci\'{o}n de un biplot es v\'{a}lida \textbf{solo dentro del subespacio proyectado}. Si las primeras dos componentes explican una fracci\'{o}n peque\~{n}a de la varianza total, los \'{a}ngulos y direcciones visibles pueden diferir considerablemente de las relaciones reales en el espacio completo. En este caso, PC1 y PC2 explican apenas el 4,1\% de la varianza: las observaciones deben tomarse como indicios cualitativos de las direcciones m\'{a}s prominentes, no como afirmaciones precisas sobre la estructura global de los datos.
+Sin embargo, toda interpretaci\'{o}n de un biplot es v\'{a}lida \textbf{solo dentro del subespacio proyectado}. Si las primeras dos componentes explican una fracci\'{o}n peque\~{n}a de la varianza total, los \'{a}ngulos y direcciones visibles pueden diferir considerablemente de las relaciones reales en el espacio completo. En este caso, PC1 y PC2 explican apenas el 4,1\% de la varianza: conviene tomar lo que se ve como una idea cualitativa de las direcciones principales, y no como algo exacto sobre la estructura global de los datos.
 
 La Figura~\ref{fig:biplot_base} muestra el conjunto de entrenamiento proyectado sobre las dos primeras componentes principales. \textit{Reuters} forma una nube claramente separada del resto en el extremo \textbf{negativo} de PC1, mientras que \textit{NYT} y \textit{CNBC} se concentran en el lado \textbf{positivo} con mayor superposici\'{o}n entre s\'{\i}. Las dos primeras componentes explican solo el 4,1\% de la varianza total: los vectores TF-IDF viven en un espacio de alta dimensionalidad y la proyecci\'{o}n bidimensional pierde la mayor\'{\i}a de la informaci\'{o}n.
 
-El t\'{e}rmino con flecha m\'{a}s larga es \textit{``the''}, paralela a PC1 apuntando hacia \textit{NYT}/\textit{CNBC}: los art\'{\i}culos de esos medios tienen mayor frecuencia relativa de \textit{``the''} que el estilo telegr\'{a}fico de \textit{Reuters}. \textit{``percent''} apunta hacia arriba (PC2 positivo), hacia la zona de \textit{NYT} y \textit{CNBC}, reflejando cobertura de noticias num\'{e}ricas. \textit{``million''} apunta en direcci\'{o}n opuesta (arriba-izquierda, hacia \textit{Reuters}), consistente con el estilo del wire financiero. \textit{``text''} apunta directamente hacia \textit{Reuters}, posiblemente como artefacto de boilerplate del medio. El resto de los t\'{e}rminos visibles (\textit{``in''}, \textit{``to''}, \textit{``of''}, \textit{``and''}, \textit{``that''}) son \textit{stop words} con flechas muy cortas y sin direcci\'{o}n clara: IDF los penaliza fuertemente pero no los elimina por completo gracias al suavizado aditivo de la f\'{o}rmula.
+El t\'{e}rmino con flecha m\'{a}s larga es \textit{``the''}, paralela a PC1 apuntando hacia \textit{NYT}/\textit{CNBC}: los art\'{\i}culos de esos medios tienen mayor frecuencia relativa de \textit{``the''} que el estilo telegr\'{a}fico de \textit{Reuters}. \textit{``percent''} apunta hacia arriba (PC2 positivo), hacia la zona de \textit{NYT} y \textit{CNBC}, porque esos medios cubren m\'{a}s noticias con cifras. \textit{``million''} apunta en direcci\'{o}n opuesta (arriba-izquierda, hacia \textit{Reuters}), consistente con el estilo del wire financiero. \textit{``text''} apunta directamente hacia \textit{Reuters}, posiblemente como artefacto de boilerplate del medio. El resto de los t\'{e}rminos visibles (\textit{``in''}, \textit{``to''}, \textit{``of''}, \textit{``and''}, \textit{``that''}) son \textit{stop words} con flechas muy cortas y sin direcci\'{o}n clara: IDF los penaliza fuertemente pero no los elimina por completo gracias al suavizado aditivo de la f\'{o}rmula.
 
 \subsubsection*{Comparaci\'{o}n de configuraciones}
 
@@ -292,7 +293,7 @@ Al eliminar las palabras funcionales del ingl\'{e}s (art\'{\i}culos, preposicion
 
 Hacia el lado de \textit{Reuters} aparecen \textit{``share''}, \textit{``yuan''}, \textit{``million''} y \textit{``company''}: vocabulario t\'{\i}pico del wire financiero internacional, que cubre cotizaciones burs\'{a}tiles, divisas asi\'{a}ticas y resultados corporativos. Hacia \textit{NYT} y \textit{CNBC} apunta \textit{``trump''}, reflejo de la cobertura pol\'{\i}tica estadounidense que domina esos medios. Que estas flechas sean aproximadamente opuestas entre s\'{\i} indica correlaci\'{o}n negativa en el plano proyectado: los art\'{\i}culos que usan mucho \textit{``yuan''} o \textit{``share''} tienden a no usar \textit{``trump''}, y viceversa.
 
-Esta separaci\'{o}n editorial no era visible en la configuraci\'{o}n base porque las palabras funcionales dominaban los loadings. Contra lo intuitivo, PC1 cae de 3,2\% a 1,1\%: al eliminar los t\'{e}rminos m\'{a}s frecuentes se reduce la concentraci\'{o}n de varianza en la primera direcci\'{o}n, distribuy\'{e}ndola entre m\'{a}s componentes.
+Esta separaci\'{o}n editorial no era visible en la configuraci\'{o}n base porque las palabras funcionales dominaban los loadings. Aunque parezca contradictorio, PC1 cae de 3,2\% a 1,1\%: al eliminar los t\'{e}rminos m\'{a}s frecuentes la varianza deja de concentrarse en la primera direcci\'{o}n y se reparte entre m\'{a}s componentes.
 
 \paragraph{b) Sin IDF (\texttt{use\_idf=False}).}
 
@@ -303,7 +304,7 @@ Esta separaci\'{o}n editorial no era visible en la configuraci\'{o}n base porque
 \label{fig:biplot_noidf}
 \end{figure}
 
-Con IDF desactivado, las palabras muy comunes recuperan el peso que el factor inverso les quitaba. El biplot (Figura~\ref{fig:biplot_noidf}) ilustra el problema con claridad: aparece una \'{u}nica flecha dominante, notablemente m\'{a}s larga que el resto, correspondiente a \textit{``the''}. PC1 salta a 14,5\% de varianza explicada (frente al 3,2\% de la configuraci\'{o}n base) porque ahora la primera componente captura principalmente variaci\'{o}n en la frecuencia de ese art\'{\i}culo, que es equidistribuida entre los tres medios y no aporta discriminaci\'{o}n. Esto ilustra concretamente por qu\'{e} el factor IDF es fundamental en clasificaci\'{o}n de texto.
+Con IDF desactivado, las palabras muy comunes recuperan el peso que el factor inverso les quitaba. El biplot (Figura~\ref{fig:biplot_noidf}) ilustra el problema con claridad: aparece una \'{u}nica flecha dominante, notablemente m\'{a}s larga que el resto, correspondiente a \textit{``the''}. PC1 salta a 14,5\% de varianza explicada (frente al 3,2\% de la configuraci\'{o}n base) porque ahora la primera componente captura principalmente variaci\'{o}n en la frecuencia de ese art\'{\i}culo, que es equidistribuida entre los tres medios y no aporta discriminaci\'{o}n. Esto muestra por qu\'{e} el factor IDF es importante en clasificaci\'{o}n de texto.
 
 \paragraph{c) Bigramas (\texttt{ngram\_range=(1,2)}).}
 
@@ -337,7 +338,7 @@ El an\'{a}lisis de los biplots permite identificar dos fuentes de separaci\'{o}n
 
 \textit{NYT} y \textit{CNBC} no se separan bien entre s\'{\i} con solo 2 componentes. Ambos quedan del mismo lado de PC1 por compartir cobertura pol\'{\i}tico-econ\'{o}mica estadounidense: \textit{``trump''} apunta hacia ambos, y \textit{``market''} tambi\'{e}n. La diferencia entre estos dos medios requiere componentes m\'{a}s all\'{a} de las dos primeras, que en conjunto explican apenas el 4,1\% de la varianza.
 
-En definitiva, con 2 componentes PCA \textbf{no es posible separar los tres medios de forma limpia}. \textit{Reuters} s\'{\i} queda claramente diferenciado, pero \textit{NYT} y \textit{CNBC} se superponen en el plano proyectado. La separaci\'{o}n observada es una combinaci\'{o}n de estilo (frecuencia de palabras funcionales, longitud de art\'{\i}culos) y contenido tem\'{a}tico (finanzas internacionales vs.\ pol\'{\i}tica estadounidense), sin que sea posible atribuirla a una sola causa.
+En definitiva, con 2 componentes PCA \textbf{no es posible separar los tres medios de forma limpia}. \textit{Reuters} s\'{\i} queda claramente diferenciado, pero \textit{NYT} y \textit{CNBC} se superponen en el plano proyectado. La separaci\'{o}n observada es una combinaci\'{o}n de estilo (frecuencia de palabras funcionales, longitud de art\'{\i}culos) y contenido tem\'{a}tico (finanzas internacionales vs.\ pol\'{\i}tica estadounidense), sin que sea posible atribuirla a una sola causa. La hip\'{o}tesis de que parte de esta separaci\'{o}n se deba a \textit{pistas} expl\'{\i}citas del medio (\textit{boilerplate} no removido) se cuantifica de forma controlada en la Secci\'{o}n~\ref{sec:pistas}, donde se muestra que su contribuci\'{o}n es marginal.
 
 % ══════════════════════════════════════════════════════════════════════
 % PARTE 2
@@ -385,7 +386,7 @@ Weighted avg       & 0,79 & 0,71 & 0,62 & 4.395 \\
 
 \subsubsection*{An\'{a}lisis}
 
-Los resultados revelan un problema cl\'{a}sico de datos desbalanceados. El modelo clasifica pr\'{a}cticamente todo como \textit{Reuters} (recall=1,00), que es la clase mayoritaria con el 63,3\% de los datos. Al usar las frecuencias de clase como probabilidades a priori, MNB aprende que apostar a \textit{Reuters} es rentable: ese sesgo le garantiza acertar todos los art\'{\i}culos de esa fuente. Como consecuencia, \textit{CNBC} queda casi invisible para el modelo (recall=0,01), e \textit{NYT} se identifica correctamente solo en el 38\% de los casos.
+Los resultados revelan un problema cl\'{a}sico de datos desbalanceados. El modelo clasifica pr\'{a}cticamente todo como \textit{Reuters} (recall=1,00), que es la clase mayoritaria con el 63,3\% de los datos. Como usa las frecuencias de clase como probabilidades a priori y \textit{Reuters} concentra la mayor\'{\i}a de los datos, al predecir casi siempre \textit{Reuters} acierta todos los art\'{\i}culos de esa fuente. Como consecuencia, \textit{CNBC} queda casi invisible para el modelo (recall=0,01), e \textit{NYT} se identifica correctamente solo en el 38\% de los casos.
 
 La relaci\'{o}n con la matriz de confusi\'{o}n (Figura~\ref{fig:confusion_mnb}) es directa: la columna de \textit{Reuters} concentra la mayor\'{\i}a de las predicciones, y las filas de \textit{NYT} y \textit{CNBC} muestran que la mayor parte de esos art\'{\i}culos es enviada err\'{o}neamente a \textit{Reuters}.
 
@@ -455,5 +456,200 @@ Las representaciones basadas en BoW y TF-IDF tienen limitaciones estructurales q
     \item \textbf{Alta dimensionalidad dispersa}: el vocabulario de 84.358 t\'{e}rminos genera vectores muy dispersos donde la mayor\'{\i}a de las entradas son cero, lo que dificulta la generalizaci\'{o}n.
     \item \textbf{Sensibles al vocabulario del train}: t\'{e}rminos nuevos en el test (palabras no vistas durante el entrenamiento) se ignoran completamente.
 \end{itemize}
+
+\subsection{Modelos alternativos: Regresi\'{o}n Log\'{\i}stica y XGBoost}
+
+\subsubsection*{Regresi\'{o}n Log\'{\i}stica: c\'{o}mo funciona}
+
+Como primer modelo alternativo se entren\'{o} una \textbf{regresi\'{o}n log\'{\i}stica multinomial} sobre las mismas \textit{features} TF-IDF. A diferencia de MNB, que es un modelo \textit{generativo} y asume independencia condicional entre las palabras dada la clase, la regresi\'{o}n log\'{\i}stica es un modelo \textit{discriminativo}: aprende directamente un vector de pesos por t\'{e}rmino para cada medio y estima $P(\text{medio} \mid \text{texto})$ aplicando la funci\'{o}n \textit{softmax} a una combinaci\'{o}n lineal de los pesos TF-IDF. No asume independencia entre \textit{features}, por lo que puede capturar mejor t\'{e}rminos correlacionados, a costa de un entrenamiento m\'{a}s lento (optimizaci\'{o}n iterativa).
+
+\subsubsection*{Resultados y comparaci\'{o}n}
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas de la regresi\'{o}n log\'{\i}stica sobre el conjunto de test.}
+\label{tab:metrics_logreg}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,87 & 0,97 & 0,92 & 2.780 \\
+The New York Times & 0,90 & 0,87 & 0,88 &   842 \\
+CNBC               & 0,85 & 0,52 & 0,65 &   773 \\
+\midrule
+Macro avg          & 0,87 & 0,79 & 0,82 & 4.395 \\
+Weighted avg       & 0,87 & 0,87 & 0,86 & 4.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/chart_confusion_logreg.png}
+\caption{Matriz de confusi\'{o}n de la regresi\'{o}n log\'{\i}stica sobre el conjunto de test.}
+\label{fig:confusion_logreg}
+\end{figure}
+
+La regresi\'{o}n log\'{\i}stica supera al MNB final en ambas m\'{e}tricas globales: el \textit{accuracy} pasa de \textbf{81,6\% a 87,4\%} y el F1-macro de \textbf{0,76 a 0,82}. La mejora m\'{a}s notoria es en la \textit{precision} de \textit{CNBC} (de 0,66 a 0,85): el modelo discriminativo comete menos falsos positivos sobre la clase minoritaria. Sin embargo, el \textit{recall} de \textit{CNBC} se mantiene bajo (0,52): casi la mitad de sus art\'{\i}culos siguen confundi\'{e}ndose con \textit{Reuters}, lo que confirma que la dificultad no es del modelo sino de la fuerte superposici\'{o}n de vocabulario financiero entre ambos medios. En resumen, ambos modelos chocan con el mismo l\'{\i}mite, pero la regresi\'{o}n log\'{\i}stica lo aprovecha mejor al no asumir independencia entre t\'{e}rminos.
+
+\subsubsection*{XGBoost: c\'{o}mo funciona}
+
+Como segundo modelo alternativo se entren\'{o} \textbf{XGBoost}, un \textit{gradient boosting} de \'{a}rboles de decisi\'{o}n, sobre las mismas \textit{features} TF-IDF. A diferencia de MNB (generativo) y de la regresi\'{o}n log\'{\i}stica (lineal discriminativo), XGBoost construye un ensamble de \'{a}rboles de forma \textit{secuencial}: cada nuevo \'{a}rbol se entrena para corregir los errores residuales de los anteriores siguiendo el gradiente de la funci\'{o}n de p\'{e}rdida. El resultado es un modelo \textit{no lineal} capaz de capturar interacciones entre t\'{e}rminos (por ejemplo, combinaciones de palabras que solo en conjunto son indicativas de un medio), a costa de un entrenamiento m\'{a}s costoso y de m\'{a}s hiperpar\'{a}metros a ajustar. Se entren\'{o} con 400 \'{a}rboles, profundidad m\'{a}xima 6 y \textit{learning rate} 0,3, aceptando directamente la matriz \textit{sparse} de TF-IDF.
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas de XGBoost sobre el conjunto de test.}
+\label{tab:metrics_xgb}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,94 & 0,98 & 0,96 & 2.780 \\
+The New York Times & 0,92 & 0,94 & 0,93 &   842 \\
+CNBC               & 0,88 & 0,72 & 0,79 &   773 \\
+\midrule
+Macro avg          & 0,91 & 0,88 & 0,89 & 4.395 \\
+Weighted avg       & 0,92 & 0,93 & 0,92 & 4.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/chart_confusion_xgb.png}
+\caption{Matriz de confusi\'{o}n de XGBoost sobre el conjunto de test.}
+\label{fig:confusion_xgb}
+\end{figure}
+
+\subsubsection*{Comparaci\'{o}n global de los tres modelos}
+
+\begin{table}[H]
+\centering
+\caption{Comparaci\'{o}n de los tres modelos sobre el conjunto de test.}
+\label{tab:metrics_compare}
+\begin{tabular}{l r r}
+\toprule
+\textbf{Modelo} & \textbf{Accuracy} & \textbf{F1-macro} \\
+\midrule
+MNB ($\alpha=0{,}01$) & 0,816 & 0,755 \\
+Regresi\'{o}n Log\'{\i}stica & 0,874 & 0,816 \\
+XGBoost & \textbf{0,926} & \textbf{0,893} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+XGBoost es el mejor de los tres modelos: el \textit{accuracy} sube a \textbf{92,6\%} y el F1-macro a \textbf{0,89}, superando claramente tanto al MNB como a la regresi\'{o}n log\'{\i}stica. El avance m\'{a}s relevante est\'{a} en la clase dif\'{\i}cil \textit{CNBC}: su \textit{recall} pasa de 0,52 (log\'{\i}stica) a \textbf{0,72}, es decir, el modelo recupera muchos m\'{a}s art\'{\i}culos de \textit{CNBC} que antes se confund\'{\i}an con \textit{Reuters}. Esto sugiere que parte de la separaci\'{o}n entre ambos medios \textbf{no es lineal} y que los \'{a}rboles, al modelar interacciones entre t\'{e}rminos, logran capturarla mejor que los modelos lineales. A\'{u}n as\'{\i}, \textit{CNBC} sigue siendo la clase con menor F1 (0,79), lo que reafirma que la superposici\'{o}n de vocabulario financiero con \textit{Reuters} es el l\'{\i}mite estructural del problema con representaciones BoW/TF-IDF, independientemente del clasificador.
+
+\subsection{Cambio de medio de prensa}
+
+Para estudiar el efecto del conjunto de clases, se reemplaz\'{o} el tercer medio (\textit{CNBC}) por el cuarto con m\'{a}s art\'{\i}culos, \textit{The Hill} (medio de pol\'{\i}tica estadounidense), manteniendo \textit{Reuters} y \textit{The New York Times}. El nuevo conjunto qued\'{o} con la siguiente distribuci\'{o}n:
+
+\begin{table}[H]
+\centering
+\caption{Balance de clases del nuevo conjunto de medios.}
+\label{tab:balance_new}
+\begin{tabular}{l r r}
+\toprule
+\textbf{Medio} & \textbf{Art\'{\i}culos} & \textbf{Proporci\'{o}n} \\
+\midrule
+Reuters            & 9.266 & 64,3\% \\
+The New York Times & 2.805 & 19,5\% \\
+The Hill           & 2.349 & 16,3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El desbalance es comparable (incluso levemente mayor) al del conjunto original: \textit{Reuters} sigue siendo la clase mayoritaria con $\sim$64\%. Reentrenando el mismo modelo (MNB con $\alpha=0{,}01$) se obtienen los resultados de la Tabla~\ref{tab:metrics_new} y la Figura~\ref{fig:confusion_new}.
+
+\begin{table}[H]
+\centering
+\caption{M\'{e}tricas del MNB ($\alpha=0{,}01$) sobre el nuevo conjunto de test.}
+\label{tab:metrics_new}
+\begin{tabular}{l r r r r}
+\toprule
+\textbf{Medio} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Support} \\
+\midrule
+Reuters            & 0,96 & 0,93 & 0,94 & 2.780 \\
+The New York Times & 0,81 & 0,86 & 0,83 &   841 \\
+The Hill           & 0,86 & 0,93 & 0,89 &   705 \\
+\midrule
+Macro avg          & 0,88 & 0,90 & 0,89 & 4.326 \\
+Weighted avg       & 0,92 & 0,91 & 0,91 & 4.326 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_confusion_newmedia.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_pca_newmedia.png}
+\end{minipage}
+\caption{Izquierda: matriz de confusi\'{o}n del MNB sobre el nuevo conjunto. Derecha: mapa de 2 componentes (TruncatedSVD) del nuevo conjunto de entrenamiento.}
+\label{fig:confusion_new}
+\end{figure}
+
+El resultado clave es que, \textbf{con un desbalance pr\'{a}cticamente igual}, el \textit{accuracy} sube de 81,6\% a \textbf{91,3\%} y el F1-macro de 0,76 a \textbf{0,89}. Esto muestra que el problema del conjunto original no era principalmente el desbalance, sino la \textbf{separabilidad tem\'{a}tica}: \textit{CNBC} comparte vocabulario econ\'{o}mico-financiero con \textit{Reuters}, mientras que \textit{The Hill}, al cubrir pol\'{\i}tica, usa un vocabulario propio (t\'{e}rminos como \textit{congress}, \textit{senate}, \textit{bill}) que lo hace mucho m\'{a}s f\'{a}cil de distinguir. El mapa de la Figura~\ref{fig:confusion_new} (derecha) anticipa este comportamiento: \textit{Reuters} forma un cl\'{u}ster compacto y \textit{The Hill} se ubica en una regi\'{o}n diferenciada, con menos solapamiento que el que se observaba para \textit{CNBC} en la Parte~1.
+
+\subsubsection*{Desbalance y t\'{e}cnicas de re-muestreo}
+
+El desbalance penaliza siempre a las clases minoritarias: el MNB tiende a favorecer a \textit{Reuters} por su mayor probabilidad a priori, y el \textit{accuracy} global queda dominado por ella. Dos familias de t\'{e}cnicas (no implementadas aqu\'{\i}) ayudan a mitigarlo: el \textbf{sobre-muestreo} de las clases minoritarias (replicar art\'{\i}culos o generar ejemplos sint\'{e}ticos, p.\,ej.\ SMOTE) y el \textbf{sub-muestreo} de la clase mayoritaria (descartar art\'{\i}culos de \textit{Reuters} para igualar los tama\~{n}os). El sobre-muestreo arriesga sobreajuste por repetici\'{o}n, y el sub-muestreo descarta informaci\'{o}n \'{u}til; una alternativa intermedia es ajustar los pesos de clase en el modelo.
+
+\subsection{Experimento adicional: impacto de las pistas del medio (\textit{data leakage})}
+\label{sec:pistas}
+
+En la Tarea~1 identificamos que varios medios incluyen plantillas y \textit{boilerplate} que delatan su origen de forma casi inequ\'{\i}voca: el \textit{dateline} \texttt{CIUDAD (Reuters) -} y la firma \texttt{Reporting by X; Editing by Y} de \textit{Reuters} (presentes en el 92\% y 56\% de sus art\'{\i}culos), el sufijo \texttt{| TheHill} y el footer legal de \textit{Capitol Hill Publishing Corp.}, el footer \texttt{madcap@cnbc.com} de \textit{CNBC}, o la auto-menci\'{o}n \texttt{New York Times}/\texttt{@NYTopinion}. La funci\'{o}n \texttt{clean\_text} \textbf{no} elimina estas marcas, por lo que un clasificador podr\'{\i}a estar apoy\'{a}ndose en ellas en lugar de aprender el estilo editorial o el contenido tem\'{a}tico: una forma de \textit{data leakage}. Esto se conecta directamente con la pregunta de la Secci\'{o}n~\ref{sec:pca} sobre el origen de la separaci\'{o}n entre medios.
+
+\subsubsection*{Metodolog\'{\i}a}
+
+Para cuantificar el efecto se entrenaron \textbf{dos pipelines id\'{e}nticos} que difieren en \textbf{una \'{u}nica variable}: la presencia o ausencia de las pistas. Ambos usan la \textbf{misma partici\'{o}n} train/test (\texttt{random\_state=23}), el \textbf{mismo vectorizador} TF-IDF y el \textbf{mismo} clasificador MNB con $\alpha=0{,}01$. La rama \textit{con pistas} es el pipeline ya descripto; la rama \textit{sin pistas} aplica primero una funci\'{o}n \texttt{strip\_media\_clues} que elimina del texto crudo las plantillas documentadas en la Tarea~1 (reutilizando las mismas expresiones regulares), y luego la misma \texttt{clean\_text}. La eliminaci\'{o}n se aplica \textbf{antes} de \texttt{clean\_text} porque varias pistas dependen de may\'{u}sculas y signos de puntuaci\'{o}n que \texttt{clean\_text} descarta. El paso de remoci\'{o}n afect\'{o} al \textbf{74,9\%} de los art\'{\i}culos de entrenamiento.
+
+\subsubsection*{Resultados}
+
+\begin{table}[H]
+\centering
+\caption{Comparaci\'{o}n del MNB ($\alpha=0{,}01$) con y sin las pistas del medio, sobre el mismo conjunto de test.}
+\label{tab:clues}
+\begin{tabular}{l r r}
+\toprule
+\textbf{Configuraci\'{o}n} & \textbf{Accuracy} & \textbf{F1-macro} \\
+\midrule
+CON pistas            & 0,816 & 0,755 \\
+SIN pistas            & 0,794 & 0,732 \\
+\midrule
+\textbf{Diferencia}   & \textbf{0,023} & \textbf{0,023} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_confusion_clues.png}
+\caption{Matrices de confusi\'{o}n del MNB con (izquierda) y sin (derecha) las pistas del medio. Al remover las pistas, \textit{Reuters} pierde aciertos (de 2.439 a 2.367) que pasan a confundirse con los otros dos medios, pero el efecto es moderado.}
+\label{fig:confusion_clues}
+\end{figure}
+
+Lo importante es que eliminar las pistas \textbf{reduce el \textit{accuracy} solo 2,3 puntos} (de 81,6\% a 79,4\%) y el F1-macro otros 2,3 puntos (de 0,755 a 0,732). La ca\'{\i}da es real pero \textbf{modesta}: indica que el clasificador \textbf{no} se apoyaba principalmente en el \textit{boilerplate}, sino que la mayor parte de su poder discriminante proviene de vocabulario gen\'{u}ino (t\'{e}rminos del \textit{wire} financiero de \textit{Reuters}, personalidades y jerga burs\'{a}til de \textit{CNBC}, secciones y firmas de \textit{NYT}). Las pistas suman un poco de desempe\~{n}o, pero no explican la mayor parte.
+
+Esto se confirma al inspeccionar los \textbf{t\'{e}rminos m\'{a}s discriminantes} de cada clase (mayor diferencia de log-probabilidad respecto al resto): pr\'{a}cticamente no cambian entre ambas ramas. Para \textit{Reuters} dominan \textit{gdynia}, \textit{qtrly}, \textit{zlotys}, \textit{eikon} (vocabulario financiero internacional); para \textit{CNBC}, \textit{cramer}, \textit{hassett}, \textit{finerman}, \textit{squawk} (nombres de su programaci\'{o}n burs\'{a}til); para \textit{NYT}, \textit{cheney}, \textit{crossword}, \textit{nytimes}. La \'{u}nica pista expl\'{\i}cita que figuraba en el \textit{top} de \textit{NYT}, \textit{nytopinion}, \textbf{desaparece} al remover el \textit{handle} \texttt{@NYTopinion}, pero su ausencia apenas mueve las m\'{e}tricas porque hab\'{\i}a much\'{\i}simos otros t\'{e}rminos informativos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/chart_pca_clues.png}
+\caption{Mapas de 2 componentes (TruncatedSVD) con (izquierda) y sin (derecha) las pistas del medio. La estructura es pr\'{a}cticamente id\'{e}ntica: \textit{Reuters} sigue separ\'{a}ndose con claridad y \textit{NYT}/\textit{CNBC} se mantienen superpuestos, lo que confirma que la separaci\'{o}n observada en la Parte~1 es gen\'{u}ina y no un artefacto del \textit{boilerplate}.}
+\label{fig:pca_clues}
+\end{figure}
+
+La Figura~\ref{fig:pca_clues} refuerza esta conclusi\'{o}n a nivel no supervisado: los mapas de 2 componentes con y sin pistas son casi indistinguibles (varianza explicada 3,8\% vs.\ 3,6\%) y \textit{Reuters} conserva su cl\'{u}ster diferenciado. En resumen, respondiendo a la pregunta de la Secci\'{o}n~\ref{sec:pca}: la separaci\'{o}n entre medios se debe \textbf{mayoritariamente a diferencias de estilo editorial y de contenido tem\'{a}tico}, y solo \textbf{marginalmente} a pistas expl\'{\i}citas no removidas en la limpieza.
+
+\subsection{T\'{e}cnica alternativa de extracci\'{o}n de \textit{features}}
+
+Una alternativa a BoW/TF-IDF son los \textbf{\textit{word embeddings}} (por ejemplo \textit{Word2Vec} o \textit{GloVe}). En lugar de representar cada palabra como una columna independiente en un vector disperso de tama\~{n}o igual al vocabulario, los \textit{embeddings} aprenden, a partir de grandes corpus, un vector \textbf{denso} de baja dimensi\'{o}n (t\'{\i}picamente 100--300) para cada palabra, de forma que palabras que aparecen en contextos similares quedan cercanas en ese espacio. Un documento puede representarse, por ejemplo, promediando los vectores de sus palabras.
+
+La diferencia principal respecto a TF-IDF es que los \textit{embeddings} capturan \textbf{relaciones sem\'{a}nticas}: sin\'{o}nimos como \textit{empresa}, \textit{compa\~{n}\'{\i}a} y \textit{firma} quedan pr\'{o}ximos, algo imposible en BoW donde son \textit{features} totalmente independientes. Esto suele mejorar la generalizaci\'{o}n y reduce mucho la dimensionalidad. Como contrapartida, se pierde la interpretabilidad directa de cada \textit{feature} y un simple promedio de vectores sigue ignorando el orden de las palabras (limitaci\'{o}n que s\'{\i} resuelven modelos contextuales m\'{a}s avanzados como \textit{BERT}). En este problema, donde la separaci\'{o}n parece deberse m\'{a}s a vocabulario tem\'{a}tico que a matices sem\'{a}nticos, no necesariamente se obtendr\'{\i}a una gran mejora, pero s\'{\i} cabr\'{\i}a esperar mejor desempe\~{n}o en la clase dif\'{\i}cil (\textit{CNBC}), donde la distinci\'{o}n es m\'{a}s sutil.
 
 \end{document}
